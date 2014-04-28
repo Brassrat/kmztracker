@@ -114,8 +114,9 @@ public class CueSheetKmlParser implements CueSheetParser
                     // cueSheet.setRoutePlacemark(activePlacemark);
                     // else
                     // TODO parse latLon
-                    double lat = 0;
-                    double lon = 0;
+                    String[] latLon = this.latLon.split(",");
+                    double lat = Double.parseDouble(latLon[0]);
+                    double lon = Double.parseDouble(latLon[1]);;
                     parser.addPlacemark(lat, lon, title, description);
                     title = null;
                     description = null;
@@ -137,6 +138,7 @@ public class CueSheetKmlParser implements CueSheetParser
                 @Override
                 protected void setLatLon(String latLon)
                 {
+                    // called from child ...
                     this.latLon = latLon;
                 }
             },

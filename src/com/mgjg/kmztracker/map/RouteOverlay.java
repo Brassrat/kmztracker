@@ -43,27 +43,29 @@ public abstract class RouteOverlay extends Overlay
     }
 
     @Override
-    public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when)
+    public boolean draw(Canvas canvas, MapView view, boolean shadow, long when)
     {
-        Projection projection = mapView.getProjection();
+        // v2 com.google.android.gms.maps.Projection projection = GoogleMap.getProjection();
+        com.google.android.maps.Projection projection = view.getProjection();
         if (shadow == false)
         {
             Paint paint = new Paint();
             paint.setAntiAlias(true);
             Point point = new Point();
             projection.toPixels(gp1, point);
+            // v2 Point point = projection.toScreenLocation(gp1);
             // mode=1&#65306;start
-            myDraw(canvas, mapView, projection, paint, point);
+            myDraw(canvas, view, projection, paint, point);
             if (!text.isEmpty())
             {
                 canvas.drawText(text, point.x, point.y, paint);
             }
 
         }
-        return super.draw(canvas, mapView, shadow, when);
+        return super.draw(canvas, view, shadow, when);
     }
 
-    protected abstract void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point);
+    protected abstract void myDraw(Canvas canvas, MapView view, com.google.android.maps.Projection projection, Paint paint, Point point);
 
     public static class StartOverlay extends RouteOverlay
     {
@@ -79,7 +81,7 @@ public abstract class RouteOverlay extends Overlay
         }
 
         @Override
-        public void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point)
+        public void myDraw(Canvas canvas, MapView view, Projection projection, Paint paint, Point point)
         {
 
             // mode=1&#65306;start
@@ -113,7 +115,7 @@ public abstract class RouteOverlay extends Overlay
         }
 
         @Override
-        public void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point)
+        public void myDraw(Canvas canvas, MapView view, com.google.android.maps.Projection projection, Paint paint, Point point)
         {
 
             // mode=1&#65306;start
@@ -137,7 +139,7 @@ public abstract class RouteOverlay extends Overlay
     {
 
         protected final GeoPoint gp2; // GeoPoint is a int. (6E)
-        
+
         public LineOverlay(GeoPoint gp1, GeoPoint gp2)
         {
             this(gp1, gp2, 999);
@@ -150,13 +152,15 @@ public abstract class RouteOverlay extends Overlay
         }
 
         @Override
-        public void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point)
+        public void myDraw(Canvas canvas, MapView view, com.google.android.maps.Projection projection, Paint paint, Point point)
         {
             // mode=2&#65306;path
 
             paint.setColor((defaultColor == 999) ? Color.RED : defaultColor);
             Point point2 = new Point();
             projection.toPixels(gp2, point2);
+            // v2 Point point2 = projection.toScreenLocation(gp2);
+
             paint.setStrokeWidth(lineWidth);
             paint.setAlpha(defaultColor == Color.parseColor("#6C8715") ? 220 : 120);
             canvas.drawLine(point.x, point.y, point2.x, point2.y, paint);
@@ -167,8 +171,8 @@ public abstract class RouteOverlay extends Overlay
     public static class LoopEndOverlay extends RouteOverlay
     {
 
-        protected final GeoPoint gp2; // GeoPoint is a int. (6E)
-        
+        protected final GeoPoint gp2;
+
         public LoopEndOverlay(GeoPoint gp1, GeoPoint gp2)
         {
             this(gp1, gp2, 999);
@@ -181,7 +185,7 @@ public abstract class RouteOverlay extends Overlay
         }
 
         @Override
-        public void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point)
+        public void myDraw(Canvas canvas, MapView view, com.google.android.maps.Projection projection, Paint paint, Point point)
         {
 
             /* mode=3&#65306;end */
@@ -196,6 +200,7 @@ public abstract class RouteOverlay extends Overlay
 
             Point point2 = new Point();
             projection.toPixels(gp2, point2);
+            // v2 Point point2 = projection.toScreenLocation(gp2);
             paint.setStrokeWidth(lineWidth);
             paint.setAlpha(defaultColor == Color.parseColor("#6C8715") ? 220 : 120);
             canvas.drawLine(point.x, point.y, point2.x, point2.y, paint);
@@ -231,7 +236,7 @@ public abstract class RouteOverlay extends Overlay
         }
 
         @Override
-        public void myDraw(Canvas canvas, MapView mapView, Projection projection, Paint paint, Point point)
+        public void myDraw(Canvas canvas, MapView view, com.google.android.maps.Projection projection, Paint paint, Point point)
         {
 
             /* mode=3&#65306;end */
@@ -244,11 +249,11 @@ public abstract class RouteOverlay extends Overlay
             // else
             // paint.setColor(defaultColor);
 
-//            Point point2 = new Point();
-//            projection.toPixels(gp2, point2);
-//            paint.setStrokeWidth(lineWidth);
-//            paint.setAlpha(defaultColor == Color.parseColor("#6C8715") ? 220 : 120);
-//            canvas.drawLine(point.x, point.y, point2.x, point2.y, paint);
+            // Point point2 = new Point();
+            // projection.toPixels(gp2, point2);
+            // paint.setStrokeWidth(lineWidth);
+            // paint.setAlpha(defaultColor == Color.parseColor("#6C8715") ? 220 : 120);
+            // canvas.drawLine(point.x, point.y, point2.x, point2.y, paint);
 
             if (null != img)
             {

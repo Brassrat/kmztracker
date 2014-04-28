@@ -1,5 +1,6 @@
 package com.mgjg.kmztracker.map;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.mgjg.kmztracker.cuesheet.CueSheet;
@@ -30,12 +31,12 @@ public class RouteService
     // return out.toString();
     // }
 
-    public CueSheet calculateRoute(Double startLat, Double startLng, Double targetLat, Double targetLng, int mode)
+    public CueSheet calculateRoute(Context context, Double startLat, Double startLng, Double targetLat, Double targetLng, int mode)
     {
-        return calculateRoute(startLat + "," + startLng, targetLat + "," + targetLng, mode);
+        return calculateRoute(context, startLat + "," + startLng, targetLat + "," + targetLng, mode);
     }
 
-    public CueSheet calculateRoute(String startCoords, String targetCoords, int mode)
+    public CueSheet calculateRoute(Context context, String startCoords, String targetCoords, int mode)
     {
 
         // TODO ... need to change to get driving directions!!!
@@ -52,9 +53,9 @@ public class RouteService
         CueSheet navSet = null;
         // for mode_any: try pedestrian route calculation first, if it fails, fall back to car route
         if (mode == MODE_ANY || mode == MODE_WALKING)
-            navSet = updateCueSheet(new CueSheet(appName), urlPedestrianMode);
+            navSet = updateCueSheet(new CueSheet(appName, context), urlPedestrianMode);
         if (mode == MODE_ANY && navSet == null || mode == MODE_CAR)
-            navSet = updateCueSheet(new CueSheet(appName), urlCarMode);
+            navSet = updateCueSheet(new CueSheet(appName, context), urlCarMode);
         return navSet;
     }
 

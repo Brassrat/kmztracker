@@ -7,28 +7,36 @@
         android:id="@+id/GPS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="GPS ON/OFF" />
+        android:contentDescription="@string/gps_on_off" />
 
     <TextView
         android:id="@+id/GPS_LAT"
-        android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/GPS"
-        />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/GPS" />
 
     <TextView
         android:id="@+id/GPS_LON"
-           android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/GPS_LAT"
-            />
-       
-<com.google.android.maps.MapView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/GPS_LAT" />
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/GPS"
+        class="com.google.android.gms.maps.MapFragment"
+        android:clickable="true" />
+
+    <!--
+    <com.google.android.maps.MapView
         android:id="@+id/mapview"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_below="@id/GPS"
-    android:clickable="true" />
- <!--  83:30:6D:A2:03:2E:B8:2F:FC:3B:39:4D:63:1E:49:88 -->
- 
- </RelativeLayout>
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/GPS"
+        android:clickable="true" />
+    -->
+    <!-- 83:30:6D:A2:03:2E:B8:2F:FC:3B:39:4D:63:1E:49:88 -->
+
+</RelativeLayout>

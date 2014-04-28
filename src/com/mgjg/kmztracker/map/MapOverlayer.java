@@ -11,16 +11,21 @@ import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.util.Log;
 
-import com.google.android.maps.GeoPoint;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.mgjg.kmztracker.R;
@@ -32,24 +37,30 @@ public class MapOverlayer
 {
 
     private static final int MAX_POINTS = 256;
-    // private final Stack<GeoPoint> points = new Stack<GeoPoint>();
-    private final Deque<GeoPoint> points = new LinkedList<GeoPoint>();
+    // private final Stack<LatLng> points = new Stack<LatLng>();
+    private final Deque<LatLng> points = new LinkedList<LatLng>();
 
     int color = 999;
     private int initial_zoom = 12;
 
     private CueSheet cueSheet;
     private final Activity mapActivity;
+    private final GoogleMap googleMap;
+    private Marker locationMarker;
 
-    public MapOverlayer(String appName, Activity mainContext)
+    public MapOverlayer(String appName, Activity mainContext, GoogleMap map)
     {
-        cueSheet = new CueSheet(appName);
+        cueSheet = new CueSheet(appName, mainContext);
         this.mapActivity = mainContext;
+        this.googleMap = map;
 
-        MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
-        mapView.setBuiltInZoomControls(true);
-        MapController mapController = mapView.getController();
-        mapController.setZoom(initial_zoom);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        // MapController mapController = googleMap.getUiSettings().getController();
+        // mapController.setZoom(initial_zoom);
+        // googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+        // Double.parseDouble(lat), Double.parseDouble(lng))));
+
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(initial_zoom));
     }
 
     public boolean isRouteDisplayed()
@@ -77,22 +88,22 @@ public class MapOverlayer
 
     }
 
-    public GeoPoint mvPoint(Location loc)
+    public LatLng mvPoint(Location loc)
     {
         return mvPoint(loc.getLatitude(), loc.getLongitude());
     }
 
-    public GeoPoint mvPoint(double lat, double lon)
+    public LatLng mvPoint(double lat, double lon)
     {
-        return mvPoint(Placemark.toMicroDegrees(lat), Placemark.toMicroDegrees(lon));
+        return mvPoint(new LatLng(lat,lon));
     }
 
-    private GeoPoint mvPoint(int lat, int lon)
-    {
-        return mvPoint(new GeoPoint(lat, lon));
-    }
+//    private LatLng mvPoint(int lat, int lon)
+//    {
+//        return mvPoint(new LatLng(lat, lon));
+//    }
 
-    private GeoPoint mvPoint(final GeoPoint geo)
+    private LatLng mvPoint(final LatLng newPoint)
     {
         // String Text = "My current location is: " + "Lat = " + lat +
         // " Long = " + lon;
@@ -105,163 +116,138 @@ public class MapOverlayer
         }
         else
         {
-            GeoPoint prev = points.peek();
-            float[] distAndBearing = dist(prev, geo);
+            LatLng prev = points.peek();
+            float[] distAndBearing = dist(prev, newPoint);
             bearing = distAndBearing[1];
         }
 
-        points.push(geo);
+        points.push(newPoint);
         if (points.size() > MAX_POINTS)
         {
             points.removeLast();
         }
 
-        final int newPointLon = geo.getLongitudeE6();
-        final int newPointLat = geo.getLatitudeE6();
+        // final int newPointLon = geo.getLongitudeE6();
+        // final int newPointLat = geo.getLatitudeE6();
 
         // TODO only move map if new point is outside 'center' region of map
         // if point is off the map move the ctr to the new point
         // if the point is outside the 'center' but displayable without
         // moving the map then just show the point
         // TODO deal with rotated map
-        MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
-        if (null == mapView)
-        {
-            return geo;
-        }
-        GeoPoint ctr = mapView.getMapCenter();
-        int[] boundaries = getMapBoundaries(mapView);
-        int ul_lat = boundaries[0];
-        int ul_lon = boundaries[1];
-        int lr_lat = boundaries[2];
-        int lr_lon = boundaries[3];
+        // MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
+        // if (null == mapView)
+        // {
+        // return geo;
+        // }
+        LatLng ctr = getMapCenter();
+        LatLngBounds boundaries = getMapBoundaries();
+        ctr = boundaries.getCenter();
+        // double ctrLat = ctr.latitude;
+        // double ctrLon = ctr.longitude;
+        LatLng newCtr = null;
 
-        int ctrLat = ctr.getLatitudeE6();
-        int ctrLon = ctr.getLongitudeE6();
+        // int ctrLat = ctr.getLatitudeE6();
+        // int ctrLon = ctr.getLongitudeE6();
         // final int lonHalf = mapView.getLongitudeSpan() / 2;
         // final int latHalf = mapView.getLatitudeSpan() / 2;
 
         // if new point is not within the current display
         // make the new point the center since we don't know
         // which way we are moving
-        if (newPointLon < ul_lon)
+        if (!boundaries.contains(newPoint))
         {
-            ctrLat = newPointLat;
-            ctrLon = newPointLon;
-            ctr = null;
-        }
-        else if (newPointLon > lr_lon)
-        {
-            ctrLat = newPointLat;
-            ctrLon = newPointLon;
-            ctr = null;
-        }
-        else if (newPointLat < lr_lat)
-        {
-            ctrLat = newPointLat;
-            ctrLon = newPointLon;
-            ctr = null;
-        }
-        else if (newPointLat > ul_lat)
-        {
-            ctrLat = newPointLat;
-            ctrLon = newPointLon;
-            ctr = null;
+            newCtr = newPoint;
         }
         else
         {
+            double ctrLat = ctr.latitude;
+            double ctrLon = ctr.longitude;
+            double ul_lat = boundaries.northeast.latitude;
+            double ul_lon = boundaries.southwest.longitude;
+            double lr_lat = boundaries.southwest.latitude;
+            double lr_lon = boundaries.northeast.longitude;
+
             // compute box within current display which
             // if point stays in the box means we don't move the center
             // box is 80% of screen, i.e., 40% on either side of center
             final double box_width_pct = .80 / 2;
             final double box_height_pct = .80 / 2;
             final double box_move_pct = .5 * 1.2;
-            final int halfWindowWidth = (int) ((ul_lon - lr_lon) * box_width_pct);
-            final int halfWindowHeight = (int) ((ul_lat - lr_lat) * box_height_pct);
+            final double halfWindowWidth = ((ul_lon - lr_lon) * box_width_pct);
+            final double halfWindowHeight = ((ul_lat - lr_lat) * box_height_pct);
 
-            final int leftLon = ctrLon - halfWindowWidth;
-            final int rightLon = ctrLon + halfWindowWidth;
-            final int bottomLat = ctrLat - halfWindowHeight;
-            final int topLat = ctrLat + halfWindowHeight;
+            final double leftLon = ctrLon - halfWindowWidth;
+            final double rightLon = ctrLon + halfWindowWidth;
+            final double bottomLat = ctrLat - halfWindowHeight;
+            final double topLat = ctrLat + halfWindowHeight;
 
-            if (newPointLat < bottomLat)
+            if (newPoint.latitude < bottomLat)
             {
                 // if new point is too low on screen move it up a bit, i.e. move
                 // center latitude smaller
                 ctrLat -= (ul_lat - lr_lat) * box_move_pct; // (lonHalf * 1.2);
                 ctr = null;
             }
-            else if (newPointLat > topLat)
+            else if (newPoint.latitude > topLat)
             {
                 ctrLat += (ul_lat - lr_lat) * box_move_pct; // (lonHalf * 1.2);
                 ctr = null;
             }
-            if (newPointLon < leftLon)
+            if (newPoint.longitude < leftLon)
             {
                 ctrLon -= (ul_lon - lr_lon) * box_move_pct; // (latHalf * 1.2);
                 ctr = null;
             }
-            if (newPointLon > rightLon)
+            if (newPoint.longitude > rightLon)
             {
                 ctrLon += (ul_lon - lr_lon) * box_move_pct; // (latHalf * 1.2);
                 ctr = null;
             }
+            newCtr = new LatLng(ctrLat, ctrLon);
         }
 
-        List<Overlay> mapOverlays = mapView.getOverlays();
+        //List<Overlay> mapOverlays = googleMap.getOverlays();
 
-        if ((null == ctr) && (null != cueSheet))
+        if ((null != newCtr) && (null != cueSheet))
         {
-            cueSheet.drawPath(getMapBoundaries(mapView), color, mapOverlays);
+            cueSheet.drawPath(googleMap, color);
         }
 
-        updateLocationOverlay(mapOverlays, geo, bearing, "On the road", "Here");
-        if (null == ctr)
+        updateLocationMarker(newPoint, bearing, "On the road", "Here");
+        if (null != newCtr)
         {
-            MapController mapController = mapView.getController();
-            ctr = new GeoPoint(ctrLat, ctrLon);
-            mapController.animateTo(ctr);
-            // mapController.setCenter(new GeoPoint(ctrLat, ctrLon));
+            // MapController mapController = mapView.getController();
+            ctr = newCtr;
+            // mapController.animateTo(ctr);
+            // mapController.setCenter(new LatLng(ctrLat, ctrLon));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newCtr, 12.0f));
         }
 
-        mapView.invalidate(); // may be overkill ???
-        return geo;
+        // googleMap.invalidate(); // may be overkill ???
+        return newPoint;
     }
 
-    private void updateLocationOverlay(List<Overlay> mapOverlays, GeoPoint geo, float bearing,
-            String title, String snippet)
-    {
-        updateLocationOverlay(mapOverlays, geo.getLatitudeE6(), geo.getLongitudeE6(),
-                bearing, title, snippet);
-    }
-
-    // private void updateLocationOverlay(double latitude, double longitude,
-    // String title, String snippet)
-    // {
-    // updateLocationOverlay(toMicroDegrees(latitude),
-    // toMicroDegrees(longitude), title, snippet);
-    // }
-
-    private void updateLocationOverlay(List<Overlay> mapOverlays, int latitude, int longitude,
+    private void updateLocationMarker(LatLng point,
             float bearing, String title, String snippet)
     {
-        MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
+        // MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
 
         // remove our LocationOverlay
-        for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
-        {
-            Overlay o = iter.next();
-            Log.d(cueSheet.getAppName(), "overlay type: " + o.getClass().getName());
-            if (o instanceof LocationOverlay)
-            {
-                iter.remove();
-            }
-        }
+//        for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
+//        {
+//            Overlay o = iter.next();
+//            Log.d(cueSheet.getAppName(), "overlay type: " + o.getClass().getName());
+//            if (o instanceof LocationOverlay)
+//            {
+//                iter.remove();
+//            }
+//        }
 
         // Drawable drawable =
         // this.getResources().getDrawable(R.drawable.androidmarker);
         // TODO - determine helmet size by number of degrees of width...
-        boolean bigger = Placemark.fromMicroDegrees(mapView.getLongitudeSpan()) > 1;
+        boolean bigger = getLongitudeSpan() > 1;
         int left = bigger ? R.drawable.mountain_bike_helmet_24 : R.drawable.mountain_bike_helmet_16;
         // TODO need larger flipped
         int right = bigger ? R.drawable.mountain_bike_helmet_16_flipped : R.drawable.mountain_bike_helmet_16_flipped;
@@ -269,11 +255,11 @@ public class MapOverlayer
         // Drawable drawable = getResources().getDrawable(drawId);
         LocationOverlay locationOverlay = new LocationOverlay(drawable);
 
-        LocationOverlayItem overlayitem = new LocationOverlayItem(latitude, longitude, title, snippet);
-        locationOverlay.addOverlay(overlayitem);
-        mapOverlays.add(locationOverlay);
+//        LocationOverlayItem overlayitem = new LocationOverlayItem(point, title, snippet);
+//        locationOverlay.addOverlay(overlayitem);
+//        mapOverlays.add(locationOverlay);
 
-        mapView.setEnabled(true);
+        // googleMap.setEnabled(true);
     }
 
     private int prevDrawId;
@@ -312,22 +298,15 @@ public class MapOverlayer
         return prevDrawable;
     }
 
-    private static class LocationOverlayItem extends OverlayItem
-    {
-
-        // public MyOverlayItem(double latitude, double longitude, String title,
-        // String snippet)
-        // {
-        // this(toMicroDegrees(latitude), toMicroDegrees(longitude), title,
-        // snippet);
-        // }
-
-        public LocationOverlayItem(int latitude, int longitude, String title, String snippet)
-        {
-            super(new GeoPoint(latitude, longitude), title, snippet);
-        }
-
-    }
+//    private static class LocationOverlayItem extends OverlayItem
+//    {
+//
+//        public LocationOverlayItem(LatLng point, String title, String snippet)
+//        {
+//            super(point, title, snippet);
+//        }
+//
+//    }
 
     private class LocationOverlay extends ItemizedOverlay<OverlayItem>
     {
@@ -340,12 +319,6 @@ public class MapOverlayer
             super(boundCenterBottom(defaultMarker));
             // this.mapContext = getApplicationContext();
         }
-
-        // public LocationOverlay(Drawable marker, Context context)
-        // {
-        // super(boundCenterBottom(marker));
-        // mapContext = context;
-        // }
 
         public void addOverlay(OverlayItem overlay)
         {
@@ -384,14 +357,27 @@ public class MapOverlayer
         }
     }
 
-    static float[] dist(GeoPoint prev, GeoPoint current)
+    static float[] dist(LatLng prev, LatLng current)
     {
         float[] results = new float[2];
-        Location.distanceBetween(Placemark.fromMicroDegrees(prev.getLatitudeE6()),
-                Placemark.fromMicroDegrees(prev.getLongitudeE6()),
-                Placemark.fromMicroDegrees(current.getLatitudeE6()),
-                Placemark.fromMicroDegrees(current.getLongitudeE6()), results);
+        Location.distanceBetween(prev.latitude,
+                prev.longitude,
+                current.latitude,
+                current.longitude, results);
         return results;
+    }
+
+    public LatLng getMapCenter()
+    {
+        return googleMap.getCameraPosition().target;
+    }
+
+    public double getLongitudeSpan()
+    {
+        final LatLngBounds bounds = getMapBoundaries();
+        double left = bounds.southwest.longitude;
+        double right = bounds.northeast.longitude;
+        return (right - left); // right >= left ==> (right-left) >= 0
     }
 
     /**
@@ -400,20 +386,90 @@ public class MapOverlayer
      * 
      * @return
      */
-    public static int[] getMapBoundaries(MapView mapView)
+    public LatLngBounds getMapBoundaries()
     {
-        GeoPoint ctr = mapView.getMapCenter();
-        int ctrLat = ctr.getLatitudeE6();
-        int ctrLon = ctr.getLongitudeE6();
+        LatLng ctr = googleMap.getCameraPosition().target;
+        // googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+        // Double.parseDouble(lat), Double.parseDouble(lng))));
+        double ctrLat = ctr.latitude;
+        double ctrLon = ctr.longitude;
         // compute width and height of current map window in degrees
-        final int lonHalf = mapView.getLongitudeSpan() / 2;
-        final int latHalf = mapView.getLatitudeSpan() / 2;
-        int[] boundaries = new int[4];
-        boundaries[0] = (ctrLat + latHalf);
-        boundaries[1] = (ctrLon - lonHalf);
-        boundaries[2] = (ctrLat - latHalf);
-        boundaries[3] = (ctrLon + lonHalf);
-        return boundaries;
+        // VisibleRegion vr = googleMap.getProjection().getVisibleRegion();
+        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+
+        // not needed anymore ...
+        double left = bounds.southwest.longitude;
+        double top = bounds.northeast.latitude;
+        double right = bounds.northeast.longitude;
+        double bottom = bounds.southwest.latitude;
+        double longitudeSpan = (right - left); // right >= left ==> (right-left) >= 0
+        double latitudeSpan = (top - bottom); // top >= bottom ==> (top-bottom) >= 0
+        final double lonHalf = longitudeSpan / 2;
+        final double latHalf = latitudeSpan / 2;
+        // double[] boundaries = new double[4];
+        double xtop = (ctrLat + latHalf); // top
+        double xleft = (ctrLon - lonHalf); // left
+        double xbottom = (ctrLat - latHalf); // bottom
+        double xright = (ctrLon + lonHalf); // right
+        LatLngBounds xbounds = new LatLngBounds(new LatLng(xbottom, xleft), new LatLng(xtop, xright));
+        // return boundaries;
+        return bounds;
     }
 
+    public boolean isVisible(LatLng point)
+    {
+        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+        return bounds.contains(point);
+    }
+
+    public boolean isVisible(double lat, double lng)
+    {
+        LatLng point = new LatLng(lat, lng);
+        return isVisible(point);
+    }
+
+    public void drawCircle(LatLng point)
+    {
+
+        // Instantiating CircleOptions to draw a circle around the marker
+        CircleOptions circleOptions = new CircleOptions();
+
+        // Specifying the center of the circle
+        circleOptions.center(point);
+
+        // Radius of the circle
+        circleOptions.radius(20);
+
+        // Border color of the circle
+        circleOptions.strokeColor(Color.BLACK);
+
+        // Fill color of the circle
+        circleOptions.fillColor(0x30ff0000);
+
+        // Border width of the circle
+        circleOptions.strokeWidth(2);
+
+        // Adding the circle to the GoogleMap
+        googleMap.addCircle(circleOptions);
+
+    }
+
+    public void drawMarker(LatLng point)
+    {
+        // Creating an instance of MarkerOptions
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        // Setting latitude and longitude for the marker
+        markerOptions.position(point);
+
+        // Adding InfoWindow title
+        markerOptions.title("Location Coordinates");
+
+        // Adding InfoWindow contents
+        markerOptions.snippet(Double.toString(point.latitude) + ","
+                + Double.toString(point.longitude));
+
+        // Adding marker on the Google Map
+        googleMap.addMarker(markerOptions);
+    }
 }

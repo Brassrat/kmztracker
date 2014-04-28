@@ -2,15 +2,17 @@ package com.mgjg.kmztracker.cuesheet;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.Overlay;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.map.Placemark;
-import com.mgjg.kmztracker.map.RouteOverlay;
 
 /**
  * A list of Placemarks, each Placemark indicates a place on the route. The route consists of lines connecting the
@@ -22,13 +24,18 @@ import com.mgjg.kmztracker.map.RouteOverlay;
  */
 public class CueSheet
 {
-
     private final String appName;
     private ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
+    private final int start_icon;
+    private final int end_icon;
+    private final int location_icon;
 
-    public CueSheet(String appName)
+    public CueSheet(String appName, Context context)
     {
         this.appName = appName;
+        start_icon = R.drawable.mountain_bike_helmet_16;
+        end_icon = R.drawable.mountain_bike_helmet_16;
+        location_icon = R.drawable.mountain_bike_helmet_16;
     }
 
     public boolean isEmpty()
@@ -40,12 +47,12 @@ public class CueSheet
     {
         placemarks.clear();
     }
-    
+
     public String getAppName()
     {
         return appName;
     }
-    
+
     public String toString()
     {
         StringBuffer buf = new StringBuffer();
@@ -72,23 +79,24 @@ public class CueSheet
      * @param pt
      * @return
      */
-    public static boolean isOnScreen(int top_lat, int left_lon, int bottom_lat, int right_lon, Placemark pl)
+    public static boolean isOnScreen(LatLngBounds boundaries, Placemark pl)
     {
-        GeoPoint pt = pl.getPoint();
-        int pt_lat = pt.getLatitudeE6();
-        int pt_lon = pt.getLongitudeE6();
-        // pt is on screen if its latitude and longitude are in the box
-        if ((bottom_lat <= pt_lat) && (top_lat >= pt_lat))
-        {
-            if ((left_lon <= pt_lon) && (right_lon >= pt_lat))
-            {
-                return true;
-            }
-        }
-        return false;
+        // GeoPoint pt = pl.getPoint();
+        // int pt_lat = pt.getLatitudeE6();
+        // int pt_lon = pt.getLongitudeE6();
+        // // pt is on screen if its latitude and longitude are in the box
+        // if ((bottom_lat <= pt_lat) && (top_lat >= pt_lat))
+        // {
+        // if ((left_lon <= pt_lon) && (right_lon >= pt_lat))
+        // {
+        // return true;
+        // }
+        // }
+        // return false;
+        return boundaries.contains(pl.getPoint());
     }
 
-    public static boolean straddles(int boundary, int pt1, int pt2)
+    public static boolean straddles(double boundary, double pt1, double pt2)
     {
         return ((pt1 <= boundary) && (pt2 >= boundary)) ||
                 ((pt2 <= boundary) && (pt1 >= boundary));
@@ -105,14 +113,14 @@ public class CueSheet
      * @param pt2
      * @return
      */
-    public static boolean isOnScreen(int top_lat, int left_lon, int bottom_lat, int right_lon, Placemark pl1, Placemark pl2)
+    public static boolean isOnScreen(LatLngBounds boundaries, Placemark pl1, Placemark pl2)
     {
 
-        if (isOnScreen(top_lat, left_lon, bottom_lat, right_lon, pl1))
+        if (isOnScreen(boundaries, pl1))
         {
             return true;
         }
-        if (isOnScreen(top_lat, left_lon, bottom_lat, right_lon, pl2))
+        if (isOnScreen(boundaries, pl2))
         {
             return true;
         }
@@ -120,12 +128,18 @@ public class CueSheet
         // but line between them may be on screen
         // simple case if both lat or both lon are within screen and other dimension crosses screen
 
-        GeoPoint pt1 = pl1.getPoint();
-        GeoPoint pt2 = pl2.getPoint();
-        int pt1_lat = pt1.getLatitudeE6();
-        int pt1_lon = pt1.getLongitudeE6();
-        int pt2_lat = pt2.getLatitudeE6();
-        int pt2_lon = pt2.getLongitudeE6();
+        final LatLng pt1 = pl1.getPoint();
+        final double pt1_lat = pt1.latitude;
+        final double pt1_lon = pt1.longitude;
+        final LatLng pt2 = pl2.getPoint();
+        final double pt2_lat = pt2.latitude;
+        final double pt2_lon = pt2.longitude;
+        final double bottom_lat = boundaries.southwest.latitude;
+        final double bottom_lon = boundaries.southwest.longitude;
+        final double top_lat = boundaries.northeast.latitude;
+        final double top_lon = boundaries.northeast.longitude;
+        final double left_lon = bottom_lon;
+        final double right_lon = top_lon;
 
         if (((bottom_lat <= pt1_lat) && (top_lat >= pt1_lat))
                 && ((bottom_lat <= pt2_lat) && (top_lat >= pt2_lat)))
@@ -161,6 +175,35 @@ public class CueSheet
         return true;
     }
 
+    private int mapColor(int color)
+    {
+        Log.d(appName, "map color before: " + color);
+
+        // color correction for dining, make it darker
+        if (color == Color.parseColor("#add331"))
+            color = Color.parseColor("#6C8715");
+        Log.d(appName, "map color after: " + color);
+        return color;
+    }
+
+    private void removeMarker(GoogleMap map)
+    {
+        // List<Overlay> overlaysToAddAgain = new ArrayList<Overlay>();
+        // remove our RouteOverlays
+        for (Placemark next : placemarks)
+        {
+            next.removeMarker(map);
+            // Overlay o = iter.next();
+            // Log.d(appName, "overlay type: " + o.getClass().getName());
+            // if (o instanceof RouteOverlay)
+            // {
+            // // overlaysToAddAgain.add(o);
+            // iter.remove();
+            // }
+        }
+        // mapOverlays.addAll(overlaysToAddAgain);
+    }
+
     /**
      * Does the actual drawing of the route, based on the geo points of the cue sheet
      * 
@@ -169,83 +212,74 @@ public class CueSheet
      * @param mapView
      *            Map view to draw onto
      */
-    public void drawPath(int[] boundaries, int color, List<Overlay> mapOverlays)
+    public void drawPath(GoogleMap map, int color)
     {
 
-        int top_lat = boundaries[0];
-        int left_lon = boundaries[1];
-        int bottom_lat = boundaries[2];
-        int right_lon = boundaries[3];
+        color = mapColor(color);
+        // removeOverlays(mapOverlays);
+        // updateOverLays(boundaries, color, mapOverlays);
+        addMarkers(map, color);
+    }
 
-        Log.d(appName, "map color before: " + color);
-
-        // color correction for dining, make it darker
-        if (color == Color.parseColor("#add331"))
-            color = Color.parseColor("#6C8715");
-        Log.d(appName, "map color after: " + color);
-
-        // List<Overlay> overlaysToAddAgain = new ArrayList<Overlay>();
-
-        // remove our RouteOverlays
-        for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
-        {
-            Overlay o = iter.next();
-            Log.d(appName, "overlay type: " + o.getClass().getName());
-            if (o instanceof RouteOverlay)
-            {
-                // overlaysToAddAgain.add(o);
-                iter.remove();
-            }
-        }
-        // mapOverlays.addAll(overlaysToAddAgain);
+    private void addMarkers(GoogleMap map, int color)
+    {
 
         Placemark start = null;
         Placemark prev = null;
-        GeoPoint prevPoint = null;
+
         for (Placemark next : placemarks)
         {
-            GeoPoint nextPoint = next.getPoint();
+            LatLng nextPoint = next.getPoint();
             if (null == start)
             {
                 start = next;
-                if (isOnScreen(top_lat, left_lon, bottom_lat, right_lon, start))
-                {
-                    // add if it has a marker and is on screen
-                    Log.d(appName, "draw: " + start.toString());
-                    mapOverlays.add(new RouteOverlay.StartOverlay(nextPoint).withText(next.getTitle())); // START
-                }
+                Log.d(appName, "mark: " + start.toString());
+                start.addMarker(map, start_icon);
+                // if (isOnScreen(boundaries, start))
+                // {
+                // // add if it has a marker and is on screen
+                // Log.d(appName, "draw: " + start.toString());
+                // mapOverlays.add(new RouteOverlay.StartOverlay(nextPoint).withText(next.getTitle())); // START
+                // }
             }
-            else if (isOnScreen(top_lat, left_lon, bottom_lat, right_lon, prev, next))
+            // else if (isOnScreen(boundaries, prev, next))
+            // {
+            if (next == start)
             {
-                if (next == start)
-                {
-                    // crosses start, assume it is loop end? or use iterator explicitly so we can check if last?
-                    // add if it has a marker and is on screen
-                    Log.d(appName, "loop end: " + next.toString());
-                    mapOverlays.add(new RouteOverlay.LoopEndOverlay(prevPoint, nextPoint, color).withText(next.getTitle())); // START
-                }
-                else
-                {
-                    // draw line
-                    Log.d(appName, "line:" + prev.toString() + " TO " + next.toString());
-                    mapOverlays.add(new RouteOverlay.LineOverlay(prevPoint, nextPoint, color).withText(next.getTitle())); // CONNECT
-                    // draw placemark
-                    // TODO - add placemark only if there is a marker ???
-                    // TURN, LUNCH, etc marker
-                    mapOverlays.add(new RouteOverlay.MarkOverlay(nextPoint).withText(next.getTitle()));
-                }
+                // crosses start, assume it is loop end? or use iterator explicitly so we can check if last?
+                // add if it has a marker and is on screen
+                Log.d(appName, "loop end: " + next.toString());
+                // mapOverlays.add(new RouteOverlay.LoopEndOverlay(prevPoint, nextPoint,
+                // color).withText(next.getTitle())); // START
             }
-            prev = next;
-            prevPoint = nextPoint;
-        }
+            else
+            {
+                // draw line
+                Log.d(appName, "line:" + prev.toString() + " TO " + next.toString());
+                // mapOverlays.add(new RouteOverlay.LineOverlay(prevPoint, nextPoint, color).withText(next.getTitle()));
+                // // CONNECT
+                // draw placemark
+                // TODO - add placemark only if there is a marker ???
+                // TURN, LUNCH, etc marker
+                // mapOverlays.add(new RouteOverlay.MarkOverlay(nextPoint).withText(next.getTitle()));
+                if (next.getTitle() != null)
+                {
+                    next.addMarker(map, start_icon);
+                }
+                // }
+                // }
+                prev = next;
 
-        // if path is not a loop
-        if (prev != start)
-        {
-            if (isOnScreen(top_lat, left_lon, bottom_lat, right_lon, prev))
+            }
+
+            // if path is not a loop
+            if (prev != start)
             {
-                Log.d(appName, "end: " + prev.toString());
-                mapOverlays.add(new RouteOverlay.EndOverlay(prev.getPoint()).withText(prev.getTitle())); // END
+                // if (isOnScreen(boundaries, prev))
+                // {
+                // Log.d(appName, "end: " + prev.toString());
+                // mapOverlays.add(new RouteOverlay.EndOverlay(prev.getPoint()).withText(prev.getTitle())); // END
+                prev.addMarker(map, end_icon);// END
             }
         }
 
@@ -254,5 +288,56 @@ public class CueSheet
     public void addPlacemark(Placemark placemark)
     {
         placemarks.add(placemark);
+    }
+
+    public void drawRoute(GoogleMap map, int color)
+    {
+        map.clear();
+        map.addPolyline(new PolylineOptions()
+                .color(mapColor(color))
+                .addAll(new Pts()));
+        addMarkers(map, color);
+    }
+
+    public class Pts implements Iterable<LatLng>
+    {
+
+        @Override
+        public Iterator<LatLng> iterator()
+        {
+            // TODO Auto-generated method stub
+            return new iii();
+        }
+
+    }
+
+    public class iii implements Iterator<LatLng>
+    {
+        Iterator<Placemark> it;
+
+        public iii()
+        {
+            it = placemarks.iterator();
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return it.hasNext();
+        }
+
+        @Override
+        public LatLng next()
+        {
+            // TODO Auto-generated method stub
+            return it.next().getPoint();
+        }
+
+        @Override
+        public void remove()
+        {
+            it.remove();
+        }
+
     }
 }

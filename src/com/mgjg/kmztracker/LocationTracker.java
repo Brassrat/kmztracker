@@ -2,8 +2,6 @@ package com.mgjg.kmztracker;
 
 import java.text.DecimalFormat;
 
-import com.mgjg.kmztracker.map.MapOverlayer;
-
 import android.app.Activity;
 import android.content.Context;
 import android.location.Criteria;
@@ -13,6 +11,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.mgjg.kmztracker.map.MapOverlayer;
 
 /**
  * Created by ja24120 on 4/14/14.
@@ -34,10 +35,10 @@ public class LocationTracker implements LocationListener
 
     }
 
-    public void onCreate(MainActivity context, Bundle savedInstance)
+    public void onCreate(MainActivity context, Bundle savedInstance, GoogleMap map)
     {
         myActivity = context;
-        tracker = new MapOverlayer(MainActivity.APP, context);
+        tracker = new MapOverlayer(MainActivity.APP, myActivity,map);
         tracker.mvPoint(initial_latitude, initial_longitude);
         
         latitudeField = (TextView) context.findViewById(R.id.GPS_LAT);
