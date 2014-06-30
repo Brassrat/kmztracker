@@ -293,7 +293,8 @@ public class MapOverlayer
 
             prevDrawId = drawId;
             prevBearing = bearing;
-            prevDrawable = new BitmapDrawable(canvasBitmap);
+            //prevDrawable = new BitmapDrawable(canvasBitmap);
+            prevDrawable = new BitmapDrawable(this.mapActivity.getResources(), canvasBitmap);
         }
         return prevDrawable;
     }
