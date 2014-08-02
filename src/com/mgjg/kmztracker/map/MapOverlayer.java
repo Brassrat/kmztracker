@@ -2,13 +2,13 @@ package com.mgjg.kmztracker.map;
 
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,13 +20,14 @@ import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
@@ -63,6 +64,11 @@ public class MapOverlayer
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(initial_zoom));
     }
 
+    public void updateCueSheet(String url)
+    {
+        RouteService.updateCueSheet(cueSheet, url);
+    }
+
     public boolean isRouteDisplayed()
     {
         return (null != cueSheet) && !cueSheet.isEmpty();
@@ -95,13 +101,13 @@ public class MapOverlayer
 
     public LatLng mvPoint(double lat, double lon)
     {
-        return mvPoint(new LatLng(lat,lon));
+        return mvPoint(new LatLng(lat, lon));
     }
 
-//    private LatLng mvPoint(int lat, int lon)
-//    {
-//        return mvPoint(new LatLng(lat, lon));
-//    }
+    // private LatLng mvPoint(int lat, int lon)
+    // {
+    // return mvPoint(new LatLng(lat, lon));
+    // }
 
     private LatLng mvPoint(final LatLng newPoint)
     {
@@ -207,7 +213,7 @@ public class MapOverlayer
             newCtr = new LatLng(ctrLat, ctrLon);
         }
 
-        //List<Overlay> mapOverlays = googleMap.getOverlays();
+        // List<Overlay> mapOverlays = googleMap.getOverlays();
 
         if ((null != newCtr) && (null != cueSheet))
         {
@@ -228,45 +234,69 @@ public class MapOverlayer
         return newPoint;
     }
 
-    private void updateLocationMarker(LatLng point,
-            float bearing, String title, String snippet)
+    private void updateLocationMarker(LatLng point, float bearing, String title, String snippet)
     {
         // MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
 
         // remove our LocationOverlay
-//        for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
-//        {
-//            Overlay o = iter.next();
-//            Log.d(cueSheet.getAppName(), "overlay type: " + o.getClass().getName());
-//            if (o instanceof LocationOverlay)
-//            {
-//                iter.remove();
-//            }
-//        }
+        // for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
+        // {
+        // Overlay o = iter.next();
+        // Log.d(cueSheet.getAppName(), "overlay type: " + o.getClass().getName());
+        // if (o instanceof LocationOverlay)
+        // {
+        // iter.remove();
+        // }
+        // }
 
-        // Drawable drawable =
-        // this.getResources().getDrawable(R.drawable.androidmarker);
+        // Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
         // TODO - determine helmet size by number of degrees of width...
         boolean bigger = getLongitudeSpan() > 1;
-        int left = bigger ? R.drawable.mountain_bike_helmet_24 : R.drawable.mountain_bike_helmet_16;
+        final int left = bigger ? R.drawable.mountain_bike_helmet_24 : R.drawable.mountain_bike_helmet_16;
         // TODO need larger flipped
-        int right = bigger ? R.drawable.mountain_bike_helmet_16_flipped : R.drawable.mountain_bike_helmet_16_flipped;
-        Drawable drawable = rotateDrawable(left, right, bearing);
+        final int right = bigger ? R.drawable.mountain_bike_helmet_16_flipped : R.drawable.mountain_bike_helmet_16_flipped;
+        final BitmapDrawable drawable = rotateDrawable(left, right, bearing);
         // Drawable drawable = getResources().getDrawable(drawId);
-        LocationOverlay locationOverlay = new LocationOverlay(drawable);
+        // LocationOverlay locationOverlay = new LocationOverlay(drawable);
 
-//        LocationOverlayItem overlayitem = new LocationOverlayItem(point, title, snippet);
-//        locationOverlay.addOverlay(overlayitem);
-//        mapOverlays.add(locationOverlay);
-
+        // LocationOverlayItem overlayitem = new LocationOverlayItem(point, title, snippet);
+        // locationOverlay.addOverlay(overlayitem);
+        // mapOverlays.add(locationOverlay);
         // googleMap.setEnabled(true);
+        MarkerOptions mo = new MarkerOptions()
+                .position(point)
+                .icon(drawableToIcon(drawable));
+    }
+
+    public BitmapDescriptor drawableToIcon(int drawId)
+    {
+        return BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(mapActivity.getResources(), drawId));
+    }
+
+    public BitmapDescriptor drawableToIcon(Drawable draw)
+    {
+        return BitmapDescriptorFactory.fromBitmap(drawableToBitmap(draw));
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable)
+    {
+        if (drawable instanceof BitmapDrawable)
+        {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     private int prevDrawId;
     private float prevBearing;
-    private Drawable prevDrawable;
+    private BitmapDrawable prevDrawable;
 
-    private Drawable rotateDrawable(int leftId, int rightId, float bearing)
+    private BitmapDrawable rotateDrawable(int leftId, int rightId, float bearing)
     {
         int drawId = (bearing < 0) ? leftId : rightId;
 
@@ -293,21 +323,21 @@ public class MapOverlayer
 
             prevDrawId = drawId;
             prevBearing = bearing;
-            //prevDrawable = new BitmapDrawable(canvasBitmap);
+            // prevDrawable = new BitmapDrawable(canvasBitmap);
             prevDrawable = new BitmapDrawable(this.mapActivity.getResources(), canvasBitmap);
         }
         return prevDrawable;
     }
 
-//    private static class LocationOverlayItem extends OverlayItem
-//    {
-//
-//        public LocationOverlayItem(LatLng point, String title, String snippet)
-//        {
-//            super(point, title, snippet);
-//        }
-//
-//    }
+    // private static class LocationOverlayItem extends OverlayItem
+    // {
+    //
+    // public LocationOverlayItem(LatLng point, String title, String snippet)
+    // {
+    // super(point, title, snippet);
+    // }
+    //
+    // }
 
     private class LocationOverlay extends ItemizedOverlay<OverlayItem>
     {
@@ -321,12 +351,14 @@ public class MapOverlayer
             // this.mapContext = getApplicationContext();
         }
 
+        @SuppressWarnings("unused")
         public void addOverlay(OverlayItem overlay)
         {
             overlays.add(overlay);
             populate();
         }
 
+        @SuppressWarnings("unused")
         public void clear()
         {
             overlays.clear();

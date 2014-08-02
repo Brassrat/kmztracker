@@ -1,6 +1,7 @@
 package com.mgjg.kmztracker.map;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import com.mgjg.kmztracker.cuesheet.CueSheet;
@@ -30,6 +31,12 @@ public class RouteService
     // }
     // return out.toString();
     // }
+
+    public CueSheet calculateRoute(Context context, Location start, Location target, int mode)
+    {
+        return calculateRoute(context, start.getLatitude() + "," + start.getLongitude(), 
+            target.getLatitude() + "," + target.getLongitude(), mode);
+    }
 
     public CueSheet calculateRoute(Context context, Double startLat, Double startLng, Double targetLat, Double targetLng, int mode)
     {

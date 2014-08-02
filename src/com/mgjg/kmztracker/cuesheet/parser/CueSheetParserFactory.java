@@ -6,7 +6,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.UnknownFormatConversionException;
 
-
 import android.util.Log;
 
 public class CueSheetParserFactory

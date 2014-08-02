@@ -1,15 +1,17 @@
 package com.mgjg.kmztracker;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.widget.Toast;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.Marker;
 
-public class MainActivity extends Activity
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+public class MainActivity extends FragmentActivity
 {
 
     public static final String APP = "com.mgjg.kmztracker";
@@ -27,7 +29,8 @@ public class MainActivity extends Activity
         // API Key
         if (BuildConfig.DEBUG)
         {
-            setContentView(R.layout.debug_main);
+            //setContentView(R.layout.debug_main);
+            setContentView(R.layout.activity_main);
         }
         else
         {
@@ -53,6 +56,7 @@ public class MainActivity extends Activity
                 {
                     return false;
                 }
+
             }
                     );
             // Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG)
@@ -87,6 +91,22 @@ public class MainActivity extends Activity
     {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
+    }
+
+    /**
+     * button handler?
+     * @param vv
+     */
+    public void setCueSheetFromXml(View vv)
+    {
+      EditText et = (EditText) findViewById(R.id.CUESHEET);
+      CharSequence seq = et.getText();
+      String url = seq.toString();
+      if (url.isEmpty())
+      {
+        url = "map.kml";
+      }
+      locLstnr.updateCueSheet(url);
     }
 
     // @Override

@@ -30,6 +30,7 @@ public class LocationTracker implements LocationListener
     private MainActivity myActivity;
     private double initial_latitude = 42.382387;
     private double initial_longitude = -71.235065;
+    
     public LocationTracker()
     {
 
@@ -65,6 +66,16 @@ public class LocationTracker implements LocationListener
             setLatitude("NONE");
             setLongitude("NONE");
         }
+    }
+    
+    public void updateCueSheet(String url)
+    {
+      tracker.updateCueSheet(url);
+    }
+
+    public void setCueSheetFromXml(String xml)
+    {
+        tracker.setCueSheetFromXml(xml);
     }
 
     private void setGpsImage(Context context, boolean enabled)

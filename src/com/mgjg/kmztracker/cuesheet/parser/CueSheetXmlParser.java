@@ -65,20 +65,21 @@ public class CueSheetXmlParser implements CueSheetParser
         return cueSheet;
     }
 
+    @SuppressWarnings("unused")
     private class XmlParser extends DefaultHandler
     {
         // ===========================================================
         // Fields
         // ===========================================================
 
-        private boolean in_kmltag = false;
-        private boolean in_placemarktag = false;
-        private boolean in_nametag = false;
-        private boolean in_descriptiontag = false;
-        private boolean in_geometrycollectiontag = false;
-        private boolean in_linestringtag = false;
-        private boolean in_pointtag = false;
-        private boolean in_coordinatestag = false;
+        private boolean inKmlTag = false;
+        private boolean inPlacemarkTag = false;
+        private boolean inNameTag = false;
+        private boolean inDescriptionTag = false;
+        private boolean inGeometryCollectionTag = false;
+        private boolean inLinestringTag = false;
+        private boolean inPointTag = false;
+        private boolean inCoordinatesTag = false;
 
         private final CueSheet cueSheet;
 
@@ -119,38 +120,38 @@ public class CueSheetXmlParser implements CueSheetParser
         {
             if (localName.equals("kml"))
             {
-                this.in_kmltag = true;
+                this.inKmlTag = true;
             }
             else if (localName.equals("Placemark"))
             {
-                this.in_placemarktag = true;
+                this.inPlacemarkTag = true;
                 title = "";
                 description = "";
                 latLon = new StringBuffer();
             }
             else if (localName.equals("name"))
             {
-                this.in_nametag = true;
+                this.inNameTag = true;
             }
             else if (localName.equals("description"))
             {
-                this.in_descriptiontag = true;
+                this.inDescriptionTag = true;
             }
             else if (localName.equals("GeometryCollection"))
             {
-                this.in_geometrycollectiontag = true;
+                this.inGeometryCollectionTag = true;
             }
             else if (localName.equals("LineString"))
             {
-                this.in_linestringtag = true;
+                this.inLinestringTag = true;
             }
             else if (localName.equals("point"))
             {
-                this.in_pointtag = true;
+                this.inPointTag = true;
             }
             else if (localName.equals("coordinates"))
             {
-                this.in_coordinatestag = true;
+                this.inCoordinatesTag = true;
             }
         }
 
@@ -163,11 +164,11 @@ public class CueSheetXmlParser implements CueSheetParser
         {
             if (localName.equals("kml"))
             {
-                this.in_kmltag = false;
+                this.inKmlTag = false;
             }
             else if (localName.equals("Placemark"))
             {
-                this.in_placemarktag = false;
+                this.inPlacemarkTag = false;
 
                 // if ("Route".equals(activePlacemark.getTitle()))
                 // cueSheet.setRoutePlacemark(activePlacemark);
@@ -179,27 +180,27 @@ public class CueSheetXmlParser implements CueSheetParser
             }
             else if (localName.equals("name"))
             {
-                this.in_nametag = false;
+                this.inNameTag = false;
             }
             else if (localName.equals("description"))
             {
-                this.in_descriptiontag = false;
+                this.inDescriptionTag = false;
             }
             else if (localName.equals("GeometryCollection"))
             {
-                this.in_geometrycollectiontag = false;
+                this.inGeometryCollectionTag = false;
             }
             else if (localName.equals("LineString"))
             {
-                this.in_linestringtag = false;
+                this.inLinestringTag = false;
             }
             else if (localName.equals("point"))
             {
-                this.in_pointtag = false;
+                this.inPointTag = false;
             }
             else if (localName.equals("coordinates"))
             {
-                this.in_coordinatestag = false;
+                this.inCoordinatesTag = false;
             }
         }
 
@@ -209,15 +210,15 @@ public class CueSheetXmlParser implements CueSheetParser
         @Override
         public void characters(char ch[], int start, int length)
         {
-            if (this.in_nametag)
+            if (this.inNameTag)
             {
                 title = new String(ch, start, length);
             }
-            else if (this.in_descriptiontag)
+            else if (this.inDescriptionTag)
             {
                 description = new String(ch, start, length);
             }
-            else if (this.in_coordinatestag)
+            else if (this.inCoordinatesTag)
             {
                 if (null == latLon)
                 {
