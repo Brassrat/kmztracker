@@ -6,3 +6,7 @@ build
 /local.properties
 /.gradle
 /.idea
+/*.iml
+/*.zip
+*.notneeded
+/settings.gradle
