@@ -1,8 +1,8 @@
 package com.mgjg.kmztracker;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.Marker;
+import android.app.Activity;
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -10,8 +10,9 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.mgjg.kmztracker.map.MapOverlayer;
 
-public class MainActivity extends FragmentActivity
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 {
 
     public static final String APP = "com.mgjg.kmztracker";
@@ -43,22 +44,23 @@ public class MainActivity extends FragmentActivity
         //
         // // Gets to GoogleMap from the MapView and does initialization stuff
         // map = mapView.getMap();
-        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-        locLstnr = new LocationTracker();
-        locLstnr.onCreate(this, savedInstanceState, map);
+        MapFragment frag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        frag.getMapAsync(this);
+    }
 
-        if (map != null)
-        {
-            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+    @Override
+    public void onMapReady(GoogleMap theMap)
+    {
+        this.map = theMap;
+         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
-                @Override
-                public boolean onMarkerClick(Marker marker)
-                {
-                    return false;
-                }
+                                          @Override
+                                          public boolean onMarkerClick(Marker marker) {
+                                              return false;
+                                          }
 
-            }
-                    );
+                                      }
+         );
             // Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG)
             // .title("Hamburg"));
             // Marker kiel = map.addMarker(new MarkerOptions()
@@ -67,7 +69,6 @@ public class MainActivity extends FragmentActivity
             // .snippet("Kiel is cool")
             // .icon(BitmapDescriptorFactory
             // .fromResource(R.drawable.ic_launcher)));
-        }
 
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.setMyLocationEnabled(true);
@@ -78,6 +79,36 @@ public class MainActivity extends FragmentActivity
         // } catch (GooglePlayServicesNotAvailableException e) {
         // e.printStackTrace();
         // }
+        /*
+        LatLng sydney = new LatLng(-33.867, 151.206);
+
+        map.setMyLocationEnabled(true);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));
+
+        map.addMarker(new MarkerOptions()
+                .title("Sydney")
+                .snippet("The most populous city in Australia.")
+                .position(sydney));
+        */
+        locLstnr = new LocationTracker(this, new MapOverlayer(MainActivity.APP, this, map));
+    }
+
+    @SuppressWarnings("unused")
+    void onResume(Activity context)
+    {
+        if (null != locLstnr)
+        {
+            locLstnr.onResume(context);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    void onPause(Activity context)
+    {
+        if (null != locLstnr)
+        {
+            locLstnr.onPause(context);
+        }
     }
 
     public void showToast(String text)

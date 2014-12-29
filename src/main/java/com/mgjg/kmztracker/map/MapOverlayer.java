@@ -22,13 +22,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.OverlayItem;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 import com.mgjg.kmztracker.cuesheet.parser.CueSheetParser;
@@ -48,6 +47,8 @@ public class MapOverlayer
     private final Activity mapActivity;
     private final GoogleMap googleMap;
     private Marker locationMarker;
+
+    private final List<Marker> markers = new ArrayList<Marker>();
 
     public MapOverlayer(String appName, Activity mainContext, GoogleMap map)
     {
@@ -234,10 +235,13 @@ public class MapOverlayer
         return newPoint;
     }
 
+    private boolean ALLOW_ROTATION = false;
+
     private void updateLocationMarker(LatLng point, float bearing, String title, String snippet)
     {
         // MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
 
+        // googleMap.clear();
         // remove our LocationOverlay
         // for (Iterator<Overlay> iter = mapOverlays.iterator(); iter.hasNext();)
         // {
@@ -263,9 +267,76 @@ public class MapOverlayer
         // locationOverlay.addOverlay(overlayitem);
         // mapOverlays.add(locationOverlay);
         // googleMap.setEnabled(true);
-        MarkerOptions mo = new MarkerOptions()
-                .position(point)
-                .icon(drawableToIcon(drawable));
+        // see https://developers.google.com/maps/documentation/android/marker
+        // ?? can we change existing marker or do we have to remove it and add another
+        if (null == locationMarker)
+        {
+            MarkerOptions mo = new MarkerOptions()
+                    .position(point)
+                    .flat(true)
+                    .title(title)
+                    .icon(drawableToIcon(drawable));
+            if (ALLOW_ROTATION)
+            {
+                mo.anchor(0.5f, 0.5f);
+                mo.rotation(bearing);
+            }
+            locationMarker = googleMap.addMarker(mo);
+            // markers.add(googleMap.addMarker(mo));
+        }
+        else {
+            locationMarker.setPosition(point);
+            if (ALLOW_ROTATION) {
+                locationMarker.setAnchor(0.5f, 0.5f);
+                locationMarker.setRotation(bearing);
+            }
+        }
+    }
+
+    public Marker drawMarker(LatLng point)
+    {
+        // Creating an instance of MarkerOptions
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        // Setting latitude and longitude for the marker
+        markerOptions.position(point);
+
+        // Adding InfoWindow title
+        markerOptions.title("Location Coordinates");
+
+        // Adding InfoWindow contents
+        markerOptions.snippet(Double.toString(point.latitude) + ","
+                + Double.toString(point.longitude));
+
+        // Adding marker on the Google Map
+        Marker mm = googleMap.addMarker(markerOptions);
+        markers.add(mm);
+        return mm;
+    }
+
+    public Circle drawCircle(LatLng point)
+    {
+
+        // Instantiating CircleOptions to draw a circle around the marker
+        CircleOptions circleOptions = new CircleOptions();
+
+        // Specifying the center of the circle
+        circleOptions.center(point);
+
+        // Radius of the circle
+        circleOptions.radius(20);
+
+        // Border color of the circle
+        circleOptions.strokeColor(Color.BLACK);
+
+        // Fill color of the circle
+        circleOptions.fillColor(0x30ff0000);
+
+        // Border width of the circle
+        circleOptions.strokeWidth(2);
+
+        // Adding the circle to the GoogleMap
+        return googleMap.addCircle(circleOptions);
     }
 
     public BitmapDescriptor drawableToIcon(int drawId)
@@ -298,6 +369,9 @@ public class MapOverlayer
 
     private BitmapDrawable rotateDrawable(int leftId, int rightId, float bearing)
     {
+        // TODO - use BitmapDescriptorFactory.fromResource(xId) to get the descriptors once
+        // then just rotate the Marker ...
+        // i.e., get rid of all this stuff...
         int drawId = (bearing < 0) ? leftId : rightId;
 
         if ((null == prevDrawable) || (prevDrawId != drawId) || (prevBearing != bearing))
@@ -329,67 +403,6 @@ public class MapOverlayer
         return prevDrawable;
     }
 
-    // private static class LocationOverlayItem extends OverlayItem
-    // {
-    //
-    // public LocationOverlayItem(LatLng point, String title, String snippet)
-    // {
-    // super(point, title, snippet);
-    // }
-    //
-    // }
-
-    private class LocationOverlay extends ItemizedOverlay<OverlayItem>
-    {
-
-        // private final Context mapContext;
-        private final List<OverlayItem> overlays = new ArrayList<OverlayItem>();
-
-        public LocationOverlay(Drawable defaultMarker)
-        {
-            super(boundCenterBottom(defaultMarker));
-            // this.mapContext = getApplicationContext();
-        }
-
-        @SuppressWarnings("unused")
-        public void addOverlay(OverlayItem overlay)
-        {
-            overlays.add(overlay);
-            populate();
-        }
-
-        @SuppressWarnings("unused")
-        public void clear()
-        {
-            overlays.clear();
-            populate();
-        }
-
-        @Override
-        protected OverlayItem createItem(int ii)
-        {
-            return overlays.get(ii);
-        }
-
-        @Override
-        public int size()
-        {
-            return overlays.size();
-        }
-
-        @Override
-        protected boolean onTap(int index)
-        {
-            OverlayItem item = overlays.get(index);
-
-            AlertDialog.Builder dialog = new AlertDialog.Builder(mapActivity.getApplicationContext());
-            dialog.setTitle(item.getTitle());
-            dialog.setMessage(item.getSnippet());
-            dialog.show();
-            return true;
-        }
-    }
-
     static float[] dist(LatLng prev, LatLng current)
     {
         float[] results = new float[2];
@@ -416,7 +429,7 @@ public class MapOverlayer
     /**
      * returns map boundaries in array where array[0] is UL latitude array[1] is UL longitude array[2] is LR latitude
      * array[3] is LR longitude
-     * 
+     *
      * @return
      */
     public LatLngBounds getMapBoundaries()
@@ -457,52 +470,7 @@ public class MapOverlayer
 
     public boolean isVisible(double lat, double lng)
     {
-        LatLng point = new LatLng(lat, lng);
-        return isVisible(point);
+        return isVisible(new LatLng(lat, lng));
     }
 
-    public void drawCircle(LatLng point)
-    {
-
-        // Instantiating CircleOptions to draw a circle around the marker
-        CircleOptions circleOptions = new CircleOptions();
-
-        // Specifying the center of the circle
-        circleOptions.center(point);
-
-        // Radius of the circle
-        circleOptions.radius(20);
-
-        // Border color of the circle
-        circleOptions.strokeColor(Color.BLACK);
-
-        // Fill color of the circle
-        circleOptions.fillColor(0x30ff0000);
-
-        // Border width of the circle
-        circleOptions.strokeWidth(2);
-
-        // Adding the circle to the GoogleMap
-        googleMap.addCircle(circleOptions);
-
-    }
-
-    public void drawMarker(LatLng point)
-    {
-        // Creating an instance of MarkerOptions
-        MarkerOptions markerOptions = new MarkerOptions();
-
-        // Setting latitude and longitude for the marker
-        markerOptions.position(point);
-
-        // Adding InfoWindow title
-        markerOptions.title("Location Coordinates");
-
-        // Adding InfoWindow contents
-        markerOptions.snippet(Double.toString(point.latitude) + ","
-                + Double.toString(point.longitude));
-
-        // Adding marker on the Google Map
-        googleMap.addMarker(markerOptions);
-    }
 }

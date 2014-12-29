@@ -43,41 +43,49 @@ public class Placemark
     // super(new GeoPoint(latitude, longitude), ((title != null) ? title : ""), ((snippet != null) ? snippet : ""));
     // }
 
+    @SuppressWarnings("unused")
     public LatLng getPoint()
     {
         return point;
     }
 
+    @SuppressWarnings("unused")
     public double getLatitude()
     {
         return getPoint().latitude;
     }
 
+    @SuppressWarnings("unused")
     public double getLongitude()
     {
         return getPoint().longitude;
     }
 
+    @SuppressWarnings("unused")
     public String getTitle()
     {
         return title;
     }
 
+    @SuppressWarnings("unused")
     public String getSnippet()
     {
         return snippet;
     }
 
+    @SuppressWarnings("unused")
     public Marker getMarker()
     {
         return marker;
     }
 
+    @SuppressWarnings("unused")
     public String toString()
     {
         return "[lat: " + point.latitude + ", lon: " + point.longitude + "]";
     }
 
+    @SuppressWarnings("unused")
     public Location toLocation()
     {
         // LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -88,6 +96,7 @@ public class Placemark
         return location;
     }
 
+    @SuppressWarnings("unused")
     public Marker addMarker(GoogleMap map, int icon)
     {
         marker = map.addMarker(new MarkerOptions()
@@ -97,6 +106,7 @@ public class Placemark
         return marker;
     }
 
+    @SuppressWarnings("unused")
     public void removeMarker(GoogleMap map)
     {
         if (marker != null)

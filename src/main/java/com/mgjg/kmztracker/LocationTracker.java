@@ -31,15 +31,10 @@ public class LocationTracker implements LocationListener
     private double initial_latitude = 42.382387;
     private double initial_longitude = -71.235065;
     
-    public LocationTracker()
-    {
-
-    }
-
-    public void onCreate(MainActivity context, Bundle savedInstance, GoogleMap map)
+    public LocationTracker(MainActivity context, MapOverlayer tracker)
     {
         myActivity = context;
-        tracker = new MapOverlayer(MainActivity.APP, myActivity,map);
+        this.tracker = tracker;
         tracker.mvPoint(initial_latitude, initial_longitude);
         
         latitudeField = (TextView) context.findViewById(R.id.GPS_LAT);
@@ -117,6 +112,7 @@ public class LocationTracker implements LocationListener
     }
 
     /* Request updates at startup */
+    @SuppressWarnings("unused")
     void onResume(Activity context)
     {
         if ((null != locationManager) && (null != provider))
@@ -126,6 +122,7 @@ public class LocationTracker implements LocationListener
         }
     }
 
+    @SuppressWarnings("unused")
     void onPause(Activity context)
     {
         if (null != locationManager)

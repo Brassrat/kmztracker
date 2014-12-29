@@ -3,7 +3,6 @@ package com.mgjg.kmztracker.map;
 import android.content.Context;
 import android.location.Location;
 import android.util.Log;
-
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 import com.mgjg.kmztracker.cuesheet.parser.CueSheetParser;
 import com.mgjg.kmztracker.cuesheet.parser.CueSheetParserFactory;
@@ -32,17 +31,20 @@ public class RouteService
     // return out.toString();
     // }
 
+    @SuppressWarnings("unused")
     public CueSheet calculateRoute(Context context, Location start, Location target, int mode)
     {
-        return calculateRoute(context, start.getLatitude() + "," + start.getLongitude(), 
+        return calculateRoute(context, start.getLatitude() + "," + start.getLongitude(),
             target.getLatitude() + "," + target.getLongitude(), mode);
     }
 
+    @SuppressWarnings("unused")
     public CueSheet calculateRoute(Context context, Double startLat, Double startLng, Double targetLat, Double targetLng, int mode)
     {
         return calculateRoute(context, startLat + "," + startLng, targetLat + "," + targetLng, mode);
     }
 
+    @SuppressWarnings("unused")
     public CueSheet calculateRoute(Context context, String startCoords, String targetCoords, int mode)
     {
 
@@ -68,7 +70,7 @@ public class RouteService
 
     /**
      * Retrieve navigation data set from either remote URL or String
-     * 
+     *
      * @param url
      * @return navigation set
      */

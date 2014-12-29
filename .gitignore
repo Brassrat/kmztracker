@@ -2,3 +2,7 @@ bin
 gen
 *~
 .metadata
+build
+/local.properties
+/.gradle
+/.idea

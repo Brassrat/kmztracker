@@ -1,12 +1,8 @@
 package com.mgjg.kmztracker.cuesheet;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -14,13 +10,16 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.map.Placemark;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 /**
  * A list of Placemarks, each Placemark indicates a place on the route. The route consists of lines connecting the
  * Placemarks. There are 2 kinds of placements, those with and those without markers. Ones with markers indicate changes
  * in direction or some other notable place on the route (i.e., beginning/ending location, lunch stop, etc.)
- * 
+ *
  * @author Jay Goldman
- * 
+ *
  */
 public class CueSheet
 {
@@ -71,12 +70,7 @@ public class CueSheet
 
     /**
      * is point on screen
-     * 
-     * @param top_lat
-     * @param left_lon
-     * @param bottom_lat
-     * @param right_lon
-     * @param pt
+     *
      * @return
      */
     public static boolean isOnScreen(LatLngBounds boundaries, Placemark pl)
@@ -104,13 +98,7 @@ public class CueSheet
 
     /**
      * would line between pts show on screen
-     * 
-     * @param top_lat
-     * @param left_lon
-     * @param bottom_lat
-     * @param right_lon
-     * @param pt1
-     * @param pt2
+     *
      * @return
      */
     public static boolean isOnScreen(LatLngBounds boundaries, Placemark pl1, Placemark pl2)
@@ -207,11 +195,11 @@ public class CueSheet
 
     /**
      * Does the actual drawing of the route, based on the geo points of the cue sheet
-     * 
+     *
+     * @param map
+     *            The map to draw on
      * @param color
      *            Color in which to draw the lines
-     * @param mapView
-     *            Map view to draw onto
      */
     public void drawPath(GoogleMap map, int color)
     {
@@ -221,6 +209,12 @@ public class CueSheet
         addMarkers(map, color);
     }
 
+    /**
+     * probably not needed any more... google map v2 will draw the route as needed
+     * @param map
+     * @param color
+     */
+    @SuppressWarnings("unused")
     public void drawRoute(GoogleMap map, int color)
     {
         map.clear();
