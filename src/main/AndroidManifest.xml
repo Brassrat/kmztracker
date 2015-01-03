@@ -36,6 +36,9 @@
             </intent-filter>
         </activity>
 
+        <service
+                android:name=".cuesheet.CueSheetService"
+                android:exported="false"/>
         <!--
              <uses-library
             android:name="com.google.android.maps"

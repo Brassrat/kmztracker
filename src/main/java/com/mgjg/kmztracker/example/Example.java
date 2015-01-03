@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,194 +22,206 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.mgjg.kmztracker.R;
 
-public class Example extends FragmentActivity {
+public class Example extends FragmentActivity
+{
 
-GoogleMap googleMap;
-LocationManager locationManager;
-PendingIntent pendingIntent;
-SharedPreferences sharedPreferences;
-int locationCount = 0;
+  GoogleMap googleMap;
+  LocationManager locationManager;
+  PendingIntent pendingIntent;
+  SharedPreferences sharedPreferences;
+  int locationCount = 0;
 
-@Override
-protected void onCreate(Bundle savedInstanceState) {
+  @Override
+  protected void onCreate(Bundle savedInstanceState)
+  {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
     // Getting Google Play availability status
     int status = GooglePlayServicesUtil
-            .isGooglePlayServicesAvailable(getBaseContext());
+        .isGooglePlayServicesAvailable(getBaseContext());
 
     // Showing status
-    if (status != ConnectionResult.SUCCESS) { // Google Play Services are
-                                                // not available
+    if (status != ConnectionResult.SUCCESS)
+    { // Google Play Services are
+      // not available
 
-        int requestCode = 10;
-        Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this,
-                requestCode);
-        dialog.show();
+      int requestCode = 10;
+      Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this,
+          requestCode);
+      dialog.show();
 
-    } else { // Google Play Services are available
+    }
+    else
+    { // Google Play Services are available
 
-        // Getting reference to the SupportMapFragment of activity_main.xml
-        SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+      // Getting reference to the SupportMapFragment of activity_main.xml
+      SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
+          .findFragmentById(R.id.map);
 
-        // Getting GoogleMap object from the fragment
-        googleMap = fm.getMap();
+      // Getting GoogleMap object from the fragment
+      googleMap = fm.getMap();
 
-        // Enabling MyLocation Layer of Google Map
-        googleMap.setMyLocationEnabled(true);
+      // Enabling MyLocation Layer of Google Map
+      googleMap.setMyLocationEnabled(true);
 
-        // Getting LocationManager object from System Service
-        // LOCATION_SERVICE
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+      // Getting LocationManager object from System Service
+      // LOCATION_SERVICE
+      locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        // Opening the sharedPreferences object
-        sharedPreferences = getSharedPreferences("location", 0);
+      // Opening the sharedPreferences object
+      sharedPreferences = getSharedPreferences("location", 0);
 
-        // Getting number of locations already stored
-        locationCount = sharedPreferences.getInt("locationCount", 0);
+      // Getting number of locations already stored
+      locationCount = sharedPreferences.getInt("locationCount", 0);
 
-        // Getting stored zoom level if exists else return 0
-        String zoom = sharedPreferences.getString("zoom", "0");
+      // Getting stored zoom level if exists else return 0
+      String zoom = sharedPreferences.getString("zoom", "0");
 
-        // If locations are already saved
-        if (locationCount != 0) {
+      // If locations are already saved
+      if (locationCount != 0)
+      {
 
-            String lat = "";
-            String lng = "";
+        String lat = "";
+        String lng = "";
 
-            // Iterating through all the locations stored
-            for (int i = 0; i < locationCount; i++) {
+        // Iterating through all the locations stored
+        for (int i = 0; i < locationCount; i++)
+        {
 
-                // Getting the latitude of the i-th location
-                lat = sharedPreferences.getString("lat" + i, "0");
+          // Getting the latitude of the i-th location
+          lat = sharedPreferences.getString("lat" + i, "0");
 
-                // Getting the longitude of the i-th location
-                lng = sharedPreferences.getString("lng" + i, "0");
+          // Getting the longitude of the i-th location
+          lng = sharedPreferences.getString("lng" + i, "0");
 
-                // Drawing marker on the map
-                drawMarker(new LatLng(Double.parseDouble(lat),
-                        Double.parseDouble(lng)));
+          // Drawing marker on the map
+          drawMarker(new LatLng(Double.parseDouble(lat),
+              Double.parseDouble(lng)));
 
-                // Drawing circle on the map
-                drawCircle(new LatLng(Double.parseDouble(lat),
-                        Double.parseDouble(lng)));
-            }
-
-            // Moving CameraPosition to last clicked position
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
-                    Double.parseDouble(lat), Double.parseDouble(lng))));
-
-            // Setting the zoom level in the map on last position is clicked
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(Float
-                    .parseFloat(zoom)));
+          // Drawing circle on the map
+          drawCircle(new LatLng(Double.parseDouble(lat),
+              Double.parseDouble(lng)));
         }
 
-        googleMap.setOnMapClickListener(new OnMapClickListener() {
+        // Moving CameraPosition to last clicked position
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+            Double.parseDouble(lat), Double.parseDouble(lng))));
 
-            public void onMapClick(LatLng point) {
+        // Setting the zoom level in the map on last position is clicked
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(Float
+            .parseFloat(zoom)));
+      }
 
-                // Incrementing location count
-                locationCount++;
+      googleMap.setOnMapClickListener(new OnMapClickListener()
+      {
 
-                // Drawing marker on the map
-                drawMarker(point);
+        public void onMapClick(LatLng point)
+        {
 
-                // Drawing circle on the map
-                drawCircle(point);
+          // Incrementing location count
+          locationCount++;
 
-                // This intent will call the activity ProximityActivity
-                Intent proximityIntent = new Intent(
-                        "in.wptrafficanalyzer.activity.proximity");
+          // Drawing marker on the map
+          drawMarker(point);
 
-                // Passing latitude to the PendingActivity
-                proximityIntent.putExtra("lat", point.latitude);
+          // Drawing circle on the map
+          drawCircle(point);
 
-                // Passing longitude to the PendingActivity
-                proximityIntent.putExtra("lng", point.longitude);
+          // This intent will call the activity ProximityActivity
+          Intent proximityIntent = new Intent(
+              "in.wptrafficanalyzer.activity.proximity");
 
-                // Creating a pending intent which will be invoked by
-                // LocationManager when the specified region is
-                // entered or exited
-                pendingIntent = PendingIntent.getActivity(getBaseContext(),
-                        0, proximityIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+          // Passing latitude to the PendingActivity
+          proximityIntent.putExtra("lat", point.latitude);
 
-                // Setting proximity alert
-                // The pending intent will be invoked when the device enters
-                // or exits the region 20 meters
-                // away from the marked point
-                // The -1 indicates that, the monitor will not be expired
-                locationManager.addProximityAlert(point.latitude,
-                        point.longitude, 20, -1, pendingIntent);
+          // Passing longitude to the PendingActivity
+          proximityIntent.putExtra("lng", point.longitude);
 
-                /**
-                 * Opening the editor object to write data to
-                 * sharedPreferences
-                 */
-                SharedPreferences.Editor editor = sharedPreferences.edit();
+          // Creating a pending intent which will be invoked by
+          // LocationManager when the specified region is
+          // entered or exited
+          pendingIntent = PendingIntent.getActivity(getBaseContext(),
+              0, proximityIntent, PendingIntent.FLAG_ONE_SHOT);
 
-                // Storing the latitude for the i-th location
-                editor.putString(
-                        "lat" + Integer.toString((locationCount - 1)),
-                        Double.toString(point.latitude));
+          // Setting proximity alert
+          // The pending intent will be invoked when the device enters
+          // or exits the region 20 meters
+          // away from the marked point
+          // The -1 indicates that, the monitor will not be expired
+          locationManager.addProximityAlert(point.latitude,
+              point.longitude, 20, -1, pendingIntent);
 
-                // Storing the longitude for the i-th location
-                editor.putString(
-                        "lng" + Integer.toString((locationCount - 1)),
-                        Double.toString(point.longitude));
+          /**
+           * Opening the editor object to write data to
+           * sharedPreferences
+           */
+          SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                // Storing the count of locations or marker count
-                editor.putInt("locationCount", locationCount);
+          // Storing the latitude for the i-th location
+          editor.putString(
+              "lat" + Integer.toString((locationCount - 1)),
+              Double.toString(point.latitude));
 
-                /** Storing the zoom level to the shared preferences */
-                editor.putString("zoom",
-                        Float.toString(googleMap.getCameraPosition().zoom));
+          // Storing the longitude for the i-th location
+          editor.putString(
+              "lng" + Integer.toString((locationCount - 1)),
+              Double.toString(point.longitude));
 
-                /** Saving the values stored in the shared preferences */
-                editor.commit();
+          // Storing the count of locations or marker count
+          editor.putInt("locationCount", locationCount);
 
-                Toast.makeText(getBaseContext(),
-                        "Proximity Alert is added", Toast.LENGTH_SHORT)
-                        .show();
+          /** Storing the zoom level to the shared preferences */
+          editor.putString("zoom",
+              Float.toString(googleMap.getCameraPosition().zoom));
 
-            }
-        });
+          /** Saving the values stored in the shared preferences */
+          editor.commit();
 
-        googleMap.setOnMapLongClickListener(new OnMapLongClickListener() {
+          Toast.makeText(getBaseContext(),
+              "Proximity Alert is added", Toast.LENGTH_SHORT)
+              .show();
 
-            public void onMapLongClick(LatLng point) {
-                Intent proximityIntent = new Intent(
-                        "in.wptrafficanalyzer.activity.proximity");
+        }
+      });
 
-                pendingIntent = PendingIntent.getActivity(getBaseContext(),
-                        0, proximityIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+      googleMap.setOnMapLongClickListener(new OnMapLongClickListener()
+      {
 
-                // Removing the proximity alert
-                locationManager.removeProximityAlert(pendingIntent);
+        public void onMapLongClick(LatLng point)
+        {
+          Intent proximityIntent = new Intent(
+              "in.wptrafficanalyzer.activity.proximity");
 
-                // Removing the marker and circle from the Google Map
-                googleMap.clear();
+          pendingIntent = PendingIntent.getActivity(getBaseContext(),
+              0, proximityIntent, PendingIntent.FLAG_ONE_SHOT);
 
-                // Opening the editor object to delete data from
-                // sharedPreferences
-                SharedPreferences.Editor editor = sharedPreferences.edit();
+          // Removing the proximity alert
+          locationManager.removeProximityAlert(pendingIntent);
 
-                // Clearing the editor
-                editor.clear();
+          // Removing the marker and circle from the Google Map
+          googleMap.clear();
 
-                // Committing the changes
-                editor.commit();
+          // Opening the editor object to delete data from
+          // sharedPreferences
+          SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                Toast.makeText(getBaseContext(),
-                        "Proximity Alert is removed", Toast.LENGTH_LONG)
-                        .show();
-            }
-        });
+          // Clearing the editor
+          editor.clear();
+
+          // Committing the changes
+          editor.commit();
+
+          Toast.makeText(getBaseContext(),
+              "Proximity Alert is removed", Toast.LENGTH_LONG)
+              .show();
+        }
+      });
     }
-}
+  }
 
-private void drawCircle(LatLng point) {
+  private void drawCircle(LatLng point)
+  {
 
     // Instantiating CircleOptions to draw a circle around the marker
     CircleOptions circleOptions = new CircleOptions();
@@ -233,9 +244,10 @@ private void drawCircle(LatLng point) {
     // Adding the circle to the GoogleMap
     googleMap.addCircle(circleOptions);
 
-}
+  }
 
-private void drawMarker(LatLng point) {
+  private void drawMarker(LatLng point)
+  {
     // Creating an instance of MarkerOptions
     MarkerOptions markerOptions = new MarkerOptions();
 
@@ -247,9 +259,9 @@ private void drawMarker(LatLng point) {
 
     // Adding InfoWindow contents
     markerOptions.snippet(Double.toString(point.latitude) + ","
-            + Double.toString(point.longitude));
+        + Double.toString(point.longitude));
 
     // Adding marker on the Google Map
     googleMap.addMarker(markerOptions);
-}
+  }
 }
