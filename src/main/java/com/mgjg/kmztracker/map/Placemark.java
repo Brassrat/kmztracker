@@ -11,16 +11,35 @@ public class Placemark
 {
   private Marker marker;
   private final LatLng point;
+  private final double altitude;
   private final String title;
   private final String snippet;
 
-  public Placemark(LatLng point, String title, String snippet)
+  public Placemark(LatLng point, double altitude, String title, String snippet)
   {
     this.point = point;
+    this.altitude = altitude;
     this.title = title;
     this.snippet = snippet;
     marker = null;
   }
+
+  public Placemark(LatLng point, double altitude)
+  {
+    this(point, altitude, null, null);
+  }
+
+
+  public Placemark(LatLng point, String title, String snippet)
+  {
+    this(point, 0, title, snippet);
+  }
+
+  public Placemark(LatLng point)
+  {
+    this(point, 0, null, null);
+  }
+
 
   // public static final int toMicroDegrees(double deg)
   // {
@@ -32,9 +51,24 @@ public class Placemark
   // return (double) (microDegrees / 1E6);
   // }
 
+  public Placemark(double latitude, double longitude, double altitude, String title, String snippet)
+  {
+    this(new LatLng(latitude, longitude), altitude, title, snippet);
+  }
+
+  public Placemark(double latitude, double longitude, double altitude)
+  {
+    this(new LatLng(latitude, longitude), altitude);
+  }
+
   public Placemark(double latitude, double longitude, String title, String snippet)
   {
     this(new LatLng(latitude, longitude), title, snippet);
+  }
+
+  public Placemark(double latitude, double longitude)
+  {
+    this(new LatLng(latitude, longitude));
   }
 
   // public Placemark(int latitude, int longitude, String title, String snippet)

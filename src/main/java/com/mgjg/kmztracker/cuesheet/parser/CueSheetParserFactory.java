@@ -113,9 +113,8 @@ public class CueSheetParserFactory
 //    aa.startService(ii);
 //    return ii;
 
-    Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString));
-    th.setName("CueSheetService");
+    Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString), "CueSheetService");
     th.setDaemon(true);
-    th.run();
+    th.start();
   }
 }

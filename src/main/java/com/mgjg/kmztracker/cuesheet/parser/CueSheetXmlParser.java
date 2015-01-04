@@ -18,8 +18,6 @@ import java.io.InputStream;
 public class CueSheetXmlParser extends CueSheetParserFactory.CueSheetFactory
 {
 
-  private InputStream inputStream;
-
   CueSheetXmlParser(String url)
   {
     super(url);
@@ -40,7 +38,7 @@ public class CueSheetXmlParser extends CueSheetParserFactory.CueSheetFactory
 
       xr.setContentHandler(dataHandler);
 
-      xr.parse(new InputSource(inputStream));
+      xr.parse(new InputSource(openConnection()));
 
     }
     catch (ParserConfigurationException pce)

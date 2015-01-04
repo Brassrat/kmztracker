@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.map.Placemark;
+import org.apache.http.MethodNotSupportedException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ import java.util.Iterator;
 public class CueSheet
 {
   private final String appName;
-  private ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
+  private final ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
   private final int start_icon;
   private final int end_icon;
   private final int location_icon;
@@ -39,12 +40,19 @@ public class CueSheet
 
   public boolean isEmpty()
   {
-    return placemarks.isEmpty();
+
+    synchronized (placemarks)
+    {
+      return placemarks.isEmpty();
+    }
   }
 
   public void clear()
   {
-    placemarks.clear();
+    synchronized (placemarks)
+    {
+      placemarks.clear();
+    }
   }
 
   public String getAppName()
@@ -56,9 +64,12 @@ public class CueSheet
   {
     StringBuffer buf = new StringBuffer();
     buf.append(appName).append(":\n");
-    for (Placemark p : placemarks)
+    synchronized (placemarks)
     {
-      buf.append("\n").append(p.toString());
+      for (Placemark p : placemarks)
+      {
+        buf.append("\n").append(p.toString());
+      }
     }
     return buf.toString();
   }
@@ -181,18 +192,21 @@ public class CueSheet
   {
     // List<Overlay> overlaysToAddAgain = new ArrayList<Overlay>();
     // remove our RouteOverlays
-    for (Placemark next : placemarks)
+    synchronized (placemarks)
     {
-      next.removeMarker(map);
-      // Overlay o = iter.next();
-      // Log.d(appName, "overlay type: " + o.getClass().getName());
-      // if (o instanceof RouteOverlay)
-      // {
-      // // overlaysToAddAgain.add(o);
-      // iter.remove();
-      // }
+      for (Placemark next : placemarks)
+      {
+        next.removeMarker(map);
+        // Overlay o = iter.next();
+        // Log.d(appName, "overlay type: " + o.getClass().getName());
+        // if (o instanceof RouteOverlay)
+        // {
+        // // overlaysToAddAgain.add(o);
+        // iter.remove();
+        // }
+      }
+      // mapOverlays.addAll(overlaysToAddAgain);
     }
-    // mapOverlays.addAll(overlaysToAddAgain);
   }
 
   /**
@@ -290,7 +304,20 @@ public class CueSheet
 
   public void addPlacemark(Placemark placemark)
   {
-    placemarks.add(placemark);
+    synchronized (placemarks)
+    {
+      placemarks.add(placemark);
+    }
+  }
+
+  public void addPt(double lat, double lon)
+  {
+    addPt(lat, lon, 0);
+  }
+
+  public void addPt(double lat, double lon, double altitude)
+  {
+    addPlacemark(new Placemark(lat, lon, altitude));
   }
 
   public class Pts implements Iterable<LatLng>
@@ -299,38 +326,42 @@ public class CueSheet
     @Override
     public Iterator<LatLng> iterator()
     {
-      // TODO Auto-generated method stub
       return new iii();
     }
 
   }
 
+  // TODO NOT THREAD SAFE !!!
   public class iii implements Iterator<LatLng>
   {
-    Iterator<Placemark> it;
+    LatLng[] pts;
+    int last = -1;
 
     public iii()
     {
-      it = placemarks.iterator();
+      synchronized (placemarks)
+      {
+        pts = placemarks.toArray(new LatLng[placemarks.size()]);
+      }
     }
 
     @Override
     public boolean hasNext()
     {
-      return it.hasNext();
+      return last < pts.length;
     }
 
     @Override
     public LatLng next()
     {
-      // TODO Auto-generated method stub
-      return it.next().getPoint();
+      return pts[++last];
     }
 
     @Override
     public void remove()
     {
-      it.remove();
+      //it.remove();
+      throw new UnsupportedOperationException("remove using iterator not supported");
     }
 
   }

@@ -13,18 +13,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
 {
-  private InputStream inputStream;
+
+  KmlParser parser;
 
   CueSheetKmlParser(String url)
   {
     super(url);
   }
-
 
   @Override
   public CueSheet parse(CueSheet cueSheet) throws Exception
@@ -37,12 +37,11 @@ public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
 
       XMLReader xr = sp.getXMLReader();
 
-      DefaultHandler dataHandler = new KmlParser(cueSheet);
+      parser = new KmlParser(cueSheet);
 
-      xr.setContentHandler(dataHandler);
+      xr.setContentHandler(parser);
 
-      xr.parse(new InputSource(inputStream));
-
+      xr.parse(new InputSource(openConnection()));
     }
     catch (ParserConfigurationException pce)
     {
@@ -63,212 +62,344 @@ public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
     return cueSheet;
   }
 
-  private static class KmlParser extends DefaultHandler
+  private abstract class Element
   {
-    // ===========================================================
-    // Fields
-    // ===========================================================
 
+    protected Element parent;
+
+    protected Element push(Element currentElement)
+    {
+      this.parent = currentElement;
+      return this;
+    }
+
+    protected Element pop()
+    {
+      return parent;
+    }
+
+    public void addPt(double lat, double lon, double alt)
+    {
+      parser.addPt(lat, lon, alt);
+    }
+
+    public void addPt(double lat, double lon)
+    {
+      parser.addPt(lat, lon);
+    }
+
+    public void addPlacemark(double lat, double lon, String title, String description)
+    {
+      parser.addPlacemark(lat, lon, title, description);
+    }
+
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+
+    }
+
+    protected void characters(char ch[], int start, int length)
+    {
+
+    }
+
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+
+    }
+
+    protected void setTitle(String title)
+    {
+
+    }
+
+    protected void setDescription(String description)
+    {
+
+    }
+
+    protected void setLatLon(String latLon)
+    {
+
+    }
+  }
+
+  private class ElementNOTAG extends Element
+  {
+  }
+
+  private class ElementKML extends Element
+  {
+  }
+
+  private class ElementDOCUMENT extends Element
+  {
+    private String description;
+    private String name;
+
+    @Override
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+      description = "";
+      name = "";
+    }
+
+    @Override
+    protected void setDescription(String description)
+    {
+      this.description = description;
+    }
+
+    protected void setTitle(String title)
+    {
+      this.name = title;
+    }
+
+    @Override
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+      description = null;
+      name = null;
+    }
+  }
+
+  private class ElementPLACEMARK extends Element
+  {
+    private String description;
+    private String title;
+    private String latLon;
+
+    @Override
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+      title = null;
+      description = null;
+      latLon = null;
+    }
+
+    @Override
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+
+      // if ("Route".equals(activePlacemark.getTitle()))
+      // cueSheet.setRoutePlacemark(activePlacemark);
+      // else
+      // TODO parse latLon
+      if (null != latLon)
+      {
+        String[] latLonAlt = latLon.split(",");
+        double lat = Double.parseDouble(latLonAlt[0]);
+        double lon = Double.parseDouble(latLonAlt[1]);
+        addPlacemark(lat, lon, title, description);
+      }
+      title = null;
+      description = null;
+      latLon = null;
+    }
+
+    @Override
+    protected void setTitle(String title)
+    {
+      this.title = title;
+    }
+
+    @Override
+    protected void setDescription(String description)
+    {
+      this.description = description;
+    }
+
+    @Override
+    protected void setLatLon(String latLon)
+    {
+      // called from child ...
+      this.latLon = latLon;
+    }
+  }
+
+  private class ElementNAME extends Element
+  {
+    private String title;
+
+    @Override
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+      title = "";
+    }
+
+    @Override
+    protected void characters(char ch[], int start, int length)
+    {
+      title = new String(ch, start, length);
+    }
+
+    @Override
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+      parent.setTitle(title);
+    }
+  }
+
+  private class ElementDESCRIPTION extends Element
+  {
+
+    private String description;
+
+    @Override
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+      description = "";
+    }
+
+    protected void characters(char ch[], int start, int length)
+    {
+      description = new String(ch, start, length);
+    }
+
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+      parent.setDescription(description);
+    }
+
+  }
+
+  private class ElementGEOMETRY extends Element
+  {
+  }
+
+  private class ElementLINE extends Element
+  {
+
+    private ArrayList<String> pts = new ArrayList<String>();
+
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+
+    }
+
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+      // TODO add Strings to ArrayList and push them to parent at endELement
+      for (String pt : pts)
+      {
+        String[] latLonAlt = pt.split(",");
+        double lat = Double.parseDouble(latLonAlt[0]);
+        double lon = Double.parseDouble(latLonAlt[1]);
+        double alt = 0;
+        if (latLonAlt.length > 2)
+        {
+          alt = Double.parseDouble(latLonAlt[2]);
+        }
+        addPt(lat, lon, alt);
+      }
+    }
+
+    @Override
+    protected void setLatLon(String latAndLon)
+    {
+      // called from coordinates child on each pair
+      pts.add(latAndLon);
+    }
+
+  }
+
+  private class ElementPOINT extends Element
+  {
+  }
+
+  private class ElementCOORDINATES extends Element
+  {
+    private StringBuffer latLon;
+
+    @Override
+    protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
+        SAXException
+    {
+      latLon = null;
+    }
+
+    @Override
+    protected void characters(char ch[], int start, int length)
+    {
+      if (null == latLon)
+      {
+        latLon = new StringBuffer();
+      }
+      // whitespace separates values
+      if ((length > 0) && ((ch[start] == '\n') || (ch[start] == ' ')))
+      {
+        // save value from before
+        if (latLon.length() > 0)
+        {
+          parent.setLatLon(latLon.toString());
+          latLon.setLength(0);
+        }
+        while ((length > 0) && ((ch[start] == '\n') || (ch[start] == ' ')))
+        {
+          // skip new line
+          ++start;
+          --length;
+        }
+      }
+      // if any non-whitespace left, copy it
+      if (length > 0)
+      {
+        latLon.append(ch, start, length);
+      }
+    }
+
+    @Override
+    protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+      if (latLon.length() > 0)
+      {
+        parent.setLatLon(latLon.toString());
+        latLon.setLength(0);
+      }
+    }
+
+  }
+
+  private class KmlParser extends DefaultHandler
+  {
     private final CueSheet cueSheet;
 
-    private Element currentElement = Element.NOTAG;
+    private Element NOTAG = new ElementNOTAG();
+    private Element currentElement = NOTAG;
 
-    public KmlParser(CueSheet cueSheet)
+    private final HashMap<String, Element> knownTags = new HashMap<String, Element>();
+
+    KmlParser(CueSheet cueSheet)
     {
       this.cueSheet = cueSheet;
     }
 
-    private void addPlacemark(double lat, double lon, String title, String description)
+    public void addPt(double lat, double lon, double alt)
+    {
+      cueSheet.addPt(lat, lon, alt);
+    }
+
+    public void addPt(double lat, double lon)
+    {
+      cueSheet.addPt(lat, lon);
+    }
+
+    public void addPlacemark(double lat, double lon, double altitude, String title, String description)
+    {
+      cueSheet.addPlacemark(new Placemark(lat, lon, altitude, title, description));
+    }
+
+    public void addPlacemark(double lat, double lon, String title, String description)
     {
       cueSheet.addPlacemark(new Placemark(lat, lon, title, description));
     }
 
-    private enum Element
-    {
-      NOTAG,
-      KML,
-      PLACEMARK
-          {
-            private KmlParser parser;
-            private String title;
-            private String description;
-            private String latLon;
-
-            @Override
-            protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
-                SAXException
-            {
-              title = null;
-              description = null;
-              latLon = null;
-            }
-
-            @Override
-            protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
-            {
-
-              // if ("Route".equals(activePlacemark.getTitle()))
-              // cueSheet.setRoutePlacemark(activePlacemark);
-              // else
-              // TODO parse latLon
-              String[] latLon = this.latLon.split(",");
-              double lat = Double.parseDouble(latLon[0]);
-              double lon = Double.parseDouble(latLon[1]);
-              ;
-              parser.addPlacemark(lat, lon, title, description);
-              title = null;
-              description = null;
-              latLon = null;
-            }
-
-            @Override
-            protected void setTitle(String title)
-            {
-              this.title = title;
-            }
-
-            @Override
-            protected void setDescription(String description)
-            {
-              this.description = description;
-            }
-
-            @Override
-            protected void setLatLon(String latLon)
-            {
-              // called from child ...
-              this.latLon = latLon;
-            }
-          },
-      NAME
-          {
-            private String title;
-            Element parent;
-
-            @Override
-            protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
-                SAXException
-            {
-              title = "";
-            }
-
-            @Override
-            protected void characters(char ch[], int start, int length)
-            {
-              title = new String(ch, start, length);
-            }
-
-            @Override
-            protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
-            {
-              parent.setTitle(title);
-            }
-          },
-      DESCRIPTION
-          {
-
-            private String description;
-            Element parent;
-
-            @Override
-            protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
-                SAXException
-            {
-              description = "";
-            }
-
-            protected void characters(char ch[], int start, int length)
-            {
-              description = new String(ch, start, length);
-            }
-
-            protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
-            {
-              parent.setDescription(description);
-            }
-
-          },
-      GEOMETRY,
-      LINE,
-      POINT,
-      COORDINATES
-          {
-            private StringBuffer latLon;
-
-            @Override
-            protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
-                SAXException
-            {
-              latLon = null;
-            }
-
-            @Override
-            protected void characters(char ch[], int start, int length)
-            {
-              if (null == latLon)
-              {
-                latLon = new StringBuffer();
-              }
-              latLon.append(ch, start, length);
-            }
-
-            @Override
-            protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
-            {
-              parent.setLatLon(latLon.toString());
-            }
-
-          };
-
-      Element parent;
-
-      private Element push(Element currentElement)
-      {
-        this.parent = currentElement;
-        return this;
-      }
-
-      protected void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws
-          SAXException
-      {
-
-      }
-
-      protected void characters(char ch[], int start, int length)
-      {
-
-      }
-
-      protected void endElement(String namespaceURI, String localName, String qName) throws SAXException
-      {
-
-      }
-
-      protected void setTitle(String title)
-      {
-
-      }
-
-      protected void setDescription(String description)
-      {
-
-      }
-
-      protected void setLatLon(String latLon)
-      {
-
-      }
-    }
-
-    ;
-
-    // ===========================================================
-    // Getter & Setter
-    // ===========================================================
-
-    // ===========================================================
-    // Methods
-    // ===========================================================
     @Override
     public void startDocument() throws SAXException
     {
@@ -281,20 +412,6 @@ public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
       // Nothing to do
     }
 
-    private static final HashMap<String, Element> knownTags = new HashMap<String, Element>();
-
-    static
-    {
-      knownTags.put("kml", Element.KML);
-      knownTags.put("Placement", Element.PLACEMARK);
-      knownTags.put("name", Element.NAME);
-      knownTags.put("description", Element.DESCRIPTION);
-      knownTags.put("GeometryCollection", Element.GEOMETRY);
-      knownTags.put("LineString", Element.LINE);
-      knownTags.put("point", Element.POINT);
-      knownTags.put("coordinates", Element.COORDINATES);
-    }
-
     /**
      * Called when opening tag is processed, e.g., &lt;tag&gt. Attribute(s) can be specified by
      * attribute="attributeValue" before &gt;, e.g., &lt;tag attr1="value1" attr2="value2" &gt;
@@ -302,11 +419,41 @@ public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
     @Override
     public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException
     {
-      Element newElement = knownTags.get(localName);
-      if (null == newElement)
+      Element newElement;
+      if ("kml".equals(localName))
       {
-        Log.e(cueSheet.getAppName(), "Unknown tag, ignore: " + localName);
-        return;
+        newElement = new ElementKML();
+      }
+      else if ("Document".equals(localName))
+      {
+        newElement = new ElementDOCUMENT();
+      }
+      else if ("Placemark".equals(localName))
+      {
+        newElement = new ElementPLACEMARK();
+      }
+      else if ("description".equals(localName))
+      {
+        newElement = new ElementDESCRIPTION();
+      }
+      else if ("name".equals(localName))
+      {
+        newElement = new ElementNAME();
+      }
+      else if ("LineString".equals(localName))
+      {
+        newElement = new ElementLINE();
+      }
+      else if ("coordinates".equals(localName))
+      {
+        newElement = new ElementCOORDINATES();
+      }
+      //knownTags.put("GeometryCollection", new ElementGEOMETRY());
+      //knownTags.put("point", new ElementPOINT());
+      else
+      {
+        Log.i(cueSheet.getAppName(), "Unknown tag, ignore: " + localName);
+        newElement = new ElementNOTAG();
       }
       newElement.startElement(namespaceURI, localName, qName, atts);
       currentElement = newElement.push(currentElement);
@@ -320,7 +467,7 @@ public class CueSheetKmlParser extends CueSheetParserFactory.CueSheetFactory
         throws SAXException
     {
       currentElement.endElement(namespaceURI, localName, qName);
-      currentElement = Element.NOTAG;
+      currentElement = currentElement.pop();
     }
 
     /**
