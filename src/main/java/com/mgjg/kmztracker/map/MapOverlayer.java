@@ -27,19 +27,18 @@ public class MapOverlayer
   // private final Stack<LatLng> points = new Stack<LatLng>();
   private final Deque<LatLng> points = new LinkedList<LatLng>();
 
-  int color = 999;
   private int initial_zoom = 12;
 
   private CueSheet cueSheet;
   private final Activity mapActivity;
   private final GoogleMap googleMap;
   private Marker locationMarker;
-
+  private final int color;
   private final List<Marker> markers = new ArrayList<Marker>();
 
   public MapOverlayer(String appName, Activity mainContext, GoogleMap map)
   {
-    cueSheet = new CueSheet(appName, mainContext);
+    cueSheet = new CueSheet(appName, mainContext, map);
     this.mapActivity = mainContext;
     this.googleMap = map;
 
@@ -50,11 +49,13 @@ public class MapOverlayer
     // Double.parseDouble(lat), Double.parseDouble(lng))));
 
     googleMap.animateCamera(CameraUpdateFactory.zoomTo(initial_zoom));
+
+    color = mainContext.getResources().getColor(R.color.DodgerBlue);
   }
 
   public void updateCueSheet(String url)
   {
-    RouteService.updateCueSheet(cueSheet, url);
+    RouteService.updateCueSheet(cueSheet, url, color);
   }
 
   public boolean isRouteDisplayed()
@@ -67,7 +68,7 @@ public class MapOverlayer
     cueSheet.clear();
     Log.d(cueSheet.getAppName(), "parsing urlString " + url);
     // TODO - remove overlay???
-    CueSheetParserFactory.parseUrl(cueSheet, url);
+    CueSheetParserFactory.parseUrl(cueSheet, url, color);
   }
 
   public LatLng mvPoint(Location loc)
@@ -193,7 +194,7 @@ public class MapOverlayer
 
     if ((null != newCtr) && (null != cueSheet))
     {
-      cueSheet.drawPath(googleMap, color);
+      cueSheet.drawPath(color);
     }
 
     updateLocationMarker(newPoint, bearing, "On the road", "Here");

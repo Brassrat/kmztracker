@@ -149,9 +149,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     EditText et = (EditText) findViewById(R.id.CUESHEET);
     CharSequence seq = et.getText();
     String url = seq.toString();
-    if (url.isEmpty() || "file".equalsIgnoreCase(url))
+    if (url.isEmpty() || "test".equalsIgnoreCase(url))
     {
-      url = "map.kml";
+      url = "http://10.0.2.2:8888/kml/test.kml";
     }
     locLstnr.updateCueSheet(url);
   }

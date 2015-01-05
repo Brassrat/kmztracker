@@ -29,7 +29,6 @@ public class Placemark
     this(point, altitude, null, null);
   }
 
-
   public Placemark(LatLng point, String title, String snippet)
   {
     this(point, 0, title, snippet);
@@ -39,7 +38,6 @@ public class Placemark
   {
     this(point, 0, null, null);
   }
-
 
   // public static final int toMicroDegrees(double deg)
   // {
@@ -92,6 +90,12 @@ public class Placemark
   public double getLongitude()
   {
     return getPoint().longitude;
+  }
+
+  @SuppressWarnings("unused")
+  public double getAltitude()
+  {
+    return altitude;
   }
 
   @SuppressWarnings("unused")

@@ -1,7 +1,9 @@
 package com.mgjg.kmztracker.cuesheet.parser;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 
 import java.io.IOException;
@@ -58,11 +60,13 @@ public class CueSheetParserFactory
 
     private final CueSheet cueSheet;
     private final String urlString;
+    private final int color;
 
-    public CueSheetUpdater(CueSheet cueSheet, String urlString)
+    public CueSheetUpdater(CueSheet cueSheet, String urlString, int color)
     {
       this.cueSheet = cueSheet;
       this.urlString = urlString;
+      this.color = color;
     }
 
     @Override
@@ -89,6 +93,16 @@ public class CueSheetParserFactory
 
       /* Set the result to be displayed in our GUI. */
         Log.d(cueSheet.getAppName(), "CueSheet: " + cueSheet.toString());
+
+        cueSheet.runOnUi(new Runnable()
+        {
+
+          @Override
+          public void run()
+          {
+            cueSheet.drawRoute(color);
+          }
+        });
       }
       catch (Exception e)
       {
@@ -98,7 +112,7 @@ public class CueSheetParserFactory
     }
   }
 
-  public static void parseUrl(CueSheet cueSheet, String urlString)
+  public static void parseUrl(CueSheet cueSheet, String urlString, int color)
   {
 //   /*
 //   * Creates a new Intent to start the CueSheetService
@@ -113,7 +127,7 @@ public class CueSheetParserFactory
 //    aa.startService(ii);
 //    return ii;
 
-    Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString), "CueSheetService");
+    Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString, color), "CueSheetService");
     th.setDaemon(true);
     th.start();
   }

@@ -1,5 +1,6 @@
 package com.mgjg.kmztracker.cuesheet;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -25,17 +26,26 @@ import java.util.Iterator;
 public class CueSheet
 {
   private final String appName;
+  private final Activity context;
+  private final GoogleMap map;
   private final ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
   private final int start_icon;
   private final int end_icon;
   private final int location_icon;
 
-  public CueSheet(String appName, Context context)
+  public CueSheet(String appName, Activity context, GoogleMap map)
   {
     this.appName = appName;
+    this.context = context;
+    this.map = map;
     start_icon = R.drawable.mountain_bike_helmet_16;
     end_icon = R.drawable.mountain_bike_helmet_16;
     location_icon = R.drawable.mountain_bike_helmet_16;
+  }
+
+  public void runOnUi(Runnable runThis)
+  {
+    context.runOnUiThread(runThis);
   }
 
   public boolean isEmpty()
@@ -188,7 +198,7 @@ public class CueSheet
   }
 
   @SuppressWarnings("unused")
-  private void removeMarkers(GoogleMap map)
+  private void removeMarkers()
   {
     // List<Overlay> overlaysToAddAgain = new ArrayList<Overlay>();
     // remove our RouteOverlays
@@ -212,34 +222,32 @@ public class CueSheet
   /**
    * Does the actual drawing of the route, based on the geo points of the cue sheet
    *
-   * @param map   The map to draw on
    * @param color Color in which to draw the lines
    */
-  public void drawPath(GoogleMap map, int color)
+  public void drawPath(int color)
   {
     color = mapColor(color);
     // removeOverlays(mapOverlays);
     // updateOverLays(boundaries, color, mapOverlays);
-    addMarkers(map, color);
+    addMarkers(color);
   }
 
   /**
    * probably not needed any more... google map v2 will draw the route as needed
    *
-   * @param map
    * @param color
    */
   @SuppressWarnings("unused")
-  public void drawRoute(GoogleMap map, int color)
+  public void drawRoute(int color)
   {
     map.clear();
     map.addPolyline(new PolylineOptions()
         .color(mapColor(color))
         .addAll(new Pts()));
-    addMarkers(map, color);
+    addMarkers(color);
   }
 
-  private void addMarkers(GoogleMap map, int color)
+  private void addMarkers(int color)
   {
 
     Placemark start = null;
@@ -320,6 +328,44 @@ public class CueSheet
     addPlacemark(new Placemark(lat, lon, altitude));
   }
 
+  @SuppressWarnings("unused")
+  public double totalUp()
+  {
+    double total = 0;
+    synchronized (placemarks)
+    {
+      double alt = placemarks.get(0).getAltitude();
+      for (Placemark pm : placemarks)
+      {
+        if (pm.getAltitude() > alt)
+        {
+          total += (pm.getAltitude() - alt);
+          alt = pm.getAltitude();
+        }
+      }
+    }
+    return total;
+  }
+
+  @SuppressWarnings("unused")
+  public double totalDown()
+  {
+    double total = 0;
+    synchronized (placemarks)
+    {
+      double alt = placemarks.get(0).getAltitude();
+      for (Placemark pm : placemarks)
+      {
+        if (pm.getAltitude() < alt)
+        {
+          total += (alt - pm.getAltitude());
+          alt = pm.getAltitude();
+        }
+      }
+    }
+    return total;
+  }
+
   public class Pts implements Iterable<LatLng>
   {
 
@@ -341,7 +387,12 @@ public class CueSheet
     {
       synchronized (placemarks)
       {
-        pts = placemarks.toArray(new LatLng[placemarks.size()]);
+        pts = new LatLng[placemarks.size()];
+        int ii = 0;
+        for (Placemark pm : placemarks)
+        {
+          pts[ii++] = pm.getPoint();
+        }
       }
     }
 
