@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- E3:6F:8A:33:8B:AB:89:26:82:DF:1A:7E:C3:AA:D0 -->
+<?xml version="1.0" encoding="utf-8"?><!-- E3:6F:8A:33:8B:AB:89:26:82:DF:1A:7E:C3:AA:D0 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <ImageView
         android:id="@+id/GPS"

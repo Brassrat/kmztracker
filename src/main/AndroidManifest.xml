@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mgjg.kmztracker"
-    >
+    package="com.mgjg.kmztracker">
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -24,12 +23,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        class="com.mgjg.kmztracker.KmzTracker"
-         >
+        class="com.mgjg.kmztracker.KmzTracker">
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,8 +35,8 @@
         </activity>
 
         <service
-                android:name=".cuesheet.CueSheetService"
-                android:exported="false"/>
+            android:name=".cuesheet.CueSheetService"
+            android:exported="false" />
         <!--
              <uses-library
             android:name="com.google.android.maps"
@@ -48,7 +46,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-            <!-- android:value="4323000" -->
+        <!-- android:value="4323000" -->
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

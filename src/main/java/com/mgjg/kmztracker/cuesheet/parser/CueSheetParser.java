@@ -5,5 +5,5 @@ import com.mgjg.kmztracker.cuesheet.CueSheet;
 
 public interface CueSheetParser
 {
-  CueSheet parse(CueSheet cueSheet) throws Exception;
+    CueSheet parse(CueSheet cueSheet) throws Exception;
 }

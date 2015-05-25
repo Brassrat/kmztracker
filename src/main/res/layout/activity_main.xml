@@ -1,81 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
     <RelativeLayout
-            android:id="@+id/GPS_INFO"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            >
+        android:id="@+id/GPS_INFO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true">
 
         <ImageView
-                android:id="@+id/GPS"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/gps_on_off"
-                />
+            android:id="@+id/GPS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/gps_on_off" />
 
         <TextView
-                android:id="@+id/GPS_LAT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/lat"
-                android:layout_toRightOf="@id/GPS"
-                android:paddingLeft="5dp"
-                android:layout_alignBaseline="@id/GPS"
-                />
+            android:id="@+id/GPS_LAT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lat"
+            android:layout_toRightOf="@id/GPS"
+            android:paddingLeft="5dp"
+            android:layout_alignBaseline="@id/GPS" />
 
         <TextView
-                android:id="@+id/GPS_LON"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/lon"
-                android:paddingLeft="5dp"
-                android:layout_toRightOf="@id/GPS_LAT"
-                android:layout_alignBaseline="@id/GPS"
-                />
+            android:id="@+id/GPS_LON"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lon"
+            android:paddingLeft="5dp"
+            android:layout_toRightOf="@id/GPS_LAT"
+            android:layout_alignBaseline="@id/GPS" />
     </RelativeLayout>
 
     <RelativeLayout
-            android:id="@+id/CUESHEET_INFO"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/GPS_INFO"
-            android:layout_alignParentLeft="true"
-            >
+        android:id="@+id/CUESHEET_INFO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/GPS_INFO"
+        android:layout_alignParentLeft="true">
 
         <Button
-                android:id="@+id/READ_CUESHEET"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/load"
-                android:onClick="setCueSheetFromXml"
-                android:labelFor="@+id/CUESHEET"
-                />
+            android:id="@+id/READ_CUESHEET"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/load"
+            android:onClick="setCueSheetFromXml"
+            android:labelFor="@+id/CUESHEET" />
 
         <EditText
-                android:id="@id/CUESHEET"
-                android:paddingLeft="10dp"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/file"
-                android:inputType="textUri"
-                android:layout_toRightOf="@id/READ_CUESHEET"
-                android:layout_alignBaseline="@id/READ_CUESHEET"
-                />
+            android:id="@id/CUESHEET"
+            android:paddingLeft="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/file"
+            android:inputType="textUri"
+            android:layout_toRightOf="@id/READ_CUESHEET"
+            android:layout_alignBaseline="@id/READ_CUESHEET" />
     </RelativeLayout>
 
     <fragment
-            android:id="@+id/map"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@id/CUESHEET_INFO"
-            class="com.google.android.gms.maps.MapFragment"
-            android:clickable="true"
-            tools:layout="@android:layout/simple_gallery_item"/>
+        android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/CUESHEET_INFO"
+        class="com.google.android.gms.maps.MapFragment"
+        android:clickable="true"
+        tools:layout="@android:layout/simple_gallery_item" />
 
     <!--
     <com.google.android.maps.MapView

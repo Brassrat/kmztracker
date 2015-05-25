@@ -1,9 +1,7 @@
 package com.mgjg.kmztracker.cuesheet.parser;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
-import com.mgjg.kmztracker.R;
+
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 
 import java.io.IOException;
@@ -15,105 +13,105 @@ import java.util.UnknownFormatConversionException;
 
 public class CueSheetParserFactory
 {
-  private static final String TAG = "kmztracker.parser";
+    private static final String TAG = "kmztracker.parser";
 
-  public static abstract class CueSheetFactory implements CueSheetParser
-  {
-    private final String urlString;
-
-    CueSheetFactory(String urlString)
+    public static abstract class CueSheetFactory implements CueSheetParser
     {
-      this.urlString = urlString;
+        private final String urlString;
+
+        CueSheetFactory(String urlString)
+        {
+            this.urlString = urlString;
+        }
+
+        protected InputStream openConnection() throws IOException
+        {
+            return getConnection().openStream();
+        }
+
+        protected URL getConnection() throws IOException
+        {
+            try
+            {
+                URL url = new URL(urlString);
+
+                final URLConnection conn = url.openConnection();
+                conn.setReadTimeout(15 * 1000); // timeout for reading the google maps data: 15 secs
+                conn.connect();
+                return url;
+            }
+            catch (MalformedURLException e)
+            {
+                Log.e(TAG, "can not open url " + urlString + " because " + e.getMessage(), e);
+                throw e;
+            }
+            catch (IOException e)
+            {
+                Log.e(TAG, "can not open url " + urlString + " because " + e.getMessage(), e);
+                throw e;
+            }
+        }
     }
 
-    protected InputStream openConnection() throws IOException
+    public static class CueSheetUpdater implements Runnable
     {
-      return getConnection().openStream();
-    }
 
-    protected URL getConnection() throws IOException
-    {
-      try
-      {
-        URL url = new URL(urlString);
+        private final CueSheet cueSheet;
+        private final String urlString;
+        private final int color;
 
-        final URLConnection conn = url.openConnection();
-        conn.setReadTimeout(15 * 1000); // timeout for reading the google maps data: 15 secs
-        conn.connect();
-        return url;
-      }
-      catch (MalformedURLException e)
-      {
-        Log.e(TAG, "can not open url " + urlString + " because " + e.getMessage(), e);
-        throw e;
-      }
-      catch (IOException e)
-      {
-        Log.e(TAG, "can not open url " + urlString + " because " + e.getMessage(), e);
-        throw e;
-      }
-    }
-  }
+        public CueSheetUpdater(CueSheet cueSheet, String urlString, int color)
+        {
+            this.cueSheet = cueSheet;
+            this.urlString = urlString;
+            this.color = color;
+        }
 
-  public static class CueSheetUpdater implements Runnable
-  {
-
-    private final CueSheet cueSheet;
-    private final String urlString;
-    private final int color;
-
-    public CueSheetUpdater(CueSheet cueSheet, String urlString, int color)
-    {
-      this.cueSheet = cueSheet;
-      this.urlString = urlString;
-      this.color = color;
-    }
-
-    @Override
-    public void run()
-    {
-      // new FileInputStream(filePath)
-      // return parse(cueSheet, url.openStream());
-      CueSheetParser parser;
-      if (urlString.endsWith(".kml"))
-      {
-        parser = new CueSheetKmlParser(urlString);
-      }
-      else if (urlString.endsWith(".xml"))
-      {
-        parser = new CueSheetXmlParser(urlString);
-      }
-      else
-      {
-        throw new UnknownFormatConversionException(urlString);
-      }
-      try
-      {
-        parser.parse(cueSheet);
+        @Override
+        public void run()
+        {
+            // new FileInputStream(filePath)
+            // return parse(cueSheet, url.openStream());
+            CueSheetParser parser;
+            if (urlString.endsWith(".kml"))
+            {
+                parser = new CueSheetKmlParser(urlString);
+            }
+            else if (urlString.endsWith(".xml"))
+            {
+                parser = new CueSheetXmlParser(urlString);
+            }
+            else
+            {
+                throw new UnknownFormatConversionException(urlString);
+            }
+            try
+            {
+                parser.parse(cueSheet);
 
       /* Set the result to be displayed in our GUI. */
-        Log.d(cueSheet.getAppName(), "CueSheet: " + cueSheet.toString());
+                Log.d(cueSheet.getAppName(), "CueSheet: " + cueSheet.toString());
 
-        cueSheet.runOnUi(new Runnable()
-        {
+                cueSheet.runOnUi(new Runnable()
+                {
 
-          @Override
-          public void run()
-          {
-            cueSheet.drawRoute(color);
-          }
-        });
-      }
-      catch (Exception e)
-      {
-        Log.e(TAG, "unable to process url(" + urlString + ") because " + e.getMessage());
-        e.printStackTrace();
-      }
+                    @Override
+                    public void run()
+                    {
+                        cueSheet.drawRoute(color);
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "unable to process url(" + urlString + ") because " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
-  }
 
-  public static void parseUrl(CueSheet cueSheet, String urlString, int color)
-  {
+    public static void parseUrl(CueSheet cueSheet, String urlString, int color)
+    {
 //   /*
 //   * Creates a new Intent to start the CueSheetService
 //   * IntentService. Passes a URI in the
@@ -127,8 +125,8 @@ public class CueSheetParserFactory
 //    aa.startService(ii);
 //    return ii;
 
-    Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString, color), "CueSheetService");
-    th.setDaemon(true);
-    th.start();
-  }
+        Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString, color), "CueSheetService");
+        th.setDaemon(true);
+        th.start();
+    }
 }

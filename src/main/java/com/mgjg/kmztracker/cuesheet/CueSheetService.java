@@ -9,17 +9,17 @@ import android.content.Intent;
 public class CueSheetService extends IntentService
 {
 
-  public CueSheetService()
-  {
-    super("CueSheetService");
+    public CueSheetService()
+    {
+        super("CueSheetService");
 
-  }
+    }
 
-  @Override
-  protected void onHandleIntent(Intent workIntent)
-  {
-    // Gets data from the incoming Intent
-    String dataString = workIntent.getDataString();
-    // TODO Do work here, based on the contents of dataString
-  }
+    @Override
+    protected void onHandleIntent(Intent workIntent)
+    {
+        // Gets data from the incoming Intent
+        String dataString = workIntent.getDataString();
+        // TODO Do work here, based on the contents of dataString
+    }
 }
