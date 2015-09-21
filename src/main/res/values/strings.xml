@@ -7,7 +7,9 @@
     <string name="gps_on_off">GPS ON/OFF</string>
     <string name="lon">LON</string>
     <string name="load">load</string>
-    <string name="file">http://192.168.1.2:8080/kml/test.kml</string>
+    <string name="kml">http://192.168.1.2:8080/kml/test.kml</string>
+    <string name="gpx">http://192.168.1.2:9999/gpx/test.gpx</string>
+    <string name="file">@string/gpx</string>
     <string name="lat">LAT</string>
 
 </resources>

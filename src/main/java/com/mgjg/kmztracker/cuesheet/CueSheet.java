@@ -2,19 +2,14 @@ package com.mgjg.kmztracker.cuesheet;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.mgjg.kmztracker.R;
-import com.mgjg.kmztracker.map.MapOverlayer;
 import com.mgjg.kmztracker.map.Placemark;
 
 import java.util.ArrayList;
@@ -32,10 +27,12 @@ public class CueSheet
     private final String appName;
     private final Activity context;
     private final GoogleMap map;
-    private final ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
     private final int start_icon;
     private final int end_icon;
     private final int location_icon;
+
+    private String trackName = "";
+    private final ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
 
     private Location NorthWestCorner;
     private Location SouthEastCorner;
@@ -75,6 +72,11 @@ public class CueSheet
     public String getAppName()
     {
         return appName;
+    }
+
+    public Activity getActivty()
+    {
+        return context;
     }
 
     public String toString()
@@ -293,7 +295,7 @@ public class CueSheet
         }
 
         // if path is not a loop
-        if (!prev.equals(start))
+        if ((null != prev) && (!prev.equals(start)))
         {
             prev.addMarker(map, end_icon);// END
         }
@@ -305,6 +307,11 @@ public class CueSheet
         {
             placemarks.add(placemark);
         }
+    }
+
+    public void addTrk(String name)
+    {
+        this.trackName = name;
     }
 
     public void addPt(double lat, double lon)

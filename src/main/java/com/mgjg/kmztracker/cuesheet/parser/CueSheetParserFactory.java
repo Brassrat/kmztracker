@@ -73,20 +73,25 @@ public class CueSheetParserFactory
             // new FileInputStream(filePath)
             // return parse(cueSheet, url.openStream());
             CueSheetParser parser;
-            if (urlString.endsWith(".kml"))
-            {
-                parser = new CueSheetKmlParser(urlString);
-            }
-            else if (urlString.endsWith(".xml"))
-            {
-                parser = new CueSheetXmlParser(urlString);
-            }
-            else
-            {
-                throw new UnknownFormatConversionException(urlString);
-            }
             try
             {
+                if (urlString.endsWith(".kml"))
+                {
+                    parser = new CueSheetKmlParser(urlString);
+                }
+                else if (urlString.endsWith(".gpx"))
+                {
+                    parser = new CueSheetGpxParser(urlString);
+                }
+                else if (urlString.endsWith(".xml"))
+                {
+                    parser = new CueSheetXmlParser(urlString);
+                }
+                else
+                {
+                    throw new UnknownFormatConversionException(urlString);
+                }
+
                 parser.parse(cueSheet);
 
       /* Set the result to be displayed in our GUI. */
@@ -118,14 +123,16 @@ public class CueSheetParserFactory
 //   * Intent's "data" field.
 //   */
 //    Intent ii = new Intent(aa, CueSheetService.class);
-//    ii.putExtra("URL", urlString);
-//    ii.put
+//    ii.putExtra("url", urlString);
+        // NO WAY TO PASS object to service ...
+//        ii.putExtra("cuesheet", cueSheet);
+//    ii.putExtra("color", color);
 //    //ii.setData(Uri.parse(dataUrl));
 //    // Starts the IntentService
 //    aa.startService(ii);
-//    return ii;
 
-        Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString, color), "CueSheetService");
+        // use background thread which updates activity-aware object
+        Thread th = new Thread(new CueSheetUpdater(cueSheet, urlString, color), "CueSheetUpdater");
         th.setDaemon(true);
         th.start();
     }

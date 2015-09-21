@@ -150,12 +150,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         EditText et = (EditText) findViewById(R.id.CUESHEET);
         CharSequence seq = et.getText();
         String url = seq.toString();
-        if (url.isEmpty() || "test".equalsIgnoreCase(url) || "file".equalsIgnoreCase(url))
+        if (url.isEmpty())
         {
             //url = "http://10.0.2.2:8888/kml/test.kml";
+            //url = "http://192.168.1.2:8080/kml/test.kml";
+            url = "http://192.168.1.2:9999/gpx/test.kml";
+        }
+        else if ("gpx".equalsIgnoreCase(url) || "test".equalsIgnoreCase(url) || "file".equalsIgnoreCase(url))
+        {
+            url = "http://192.168.1.2:9999/gpx/test.gpx";
+        }
+        else if ("kml".equalsIgnoreCase(url))
+        {
             url = "http://192.168.1.2:8080/kml/test.kml";
         }
-        locLstnr.updateCueSheet(url);
+        if (null != locLstnr)
+        {
+            locLstnr.updateCueSheet(url);
+        }
     }
 
     // @Override

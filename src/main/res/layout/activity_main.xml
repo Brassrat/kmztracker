@@ -8,7 +8,7 @@
         android:id="@+id/GPS_INFO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true">
+        android:layout_alignParentStart="true">
 
         <ImageView
             android:id="@+id/GPS"
@@ -21,8 +21,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/lat"
-            android:layout_toRightOf="@id/GPS"
-            android:paddingLeft="5dp"
+            android:layout_toEndOf="@id/GPS"
+            android:paddingStart="5dp"
             android:layout_alignBaseline="@id/GPS" />
 
         <TextView
@@ -30,8 +30,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/lon"
-            android:paddingLeft="5dp"
-            android:layout_toRightOf="@id/GPS_LAT"
+            android:paddingStart="5dp"
+            android:layout_toEndOf="@id/GPS_LAT"
             android:layout_alignBaseline="@id/GPS" />
     </RelativeLayout>
 
@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/GPS_INFO"
-        android:layout_alignParentLeft="true">
+        android:layout_alignParentStart="true">
 
         <Button
             android:id="@+id/READ_CUESHEET"
@@ -52,12 +52,12 @@
 
         <EditText
             android:id="@id/CUESHEET"
-            android:paddingLeft="10dp"
+            android:paddingStart="10dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/file"
             android:inputType="textUri"
-            android:layout_toRightOf="@id/READ_CUESHEET"
+            android:layout_toEndOf="@id/READ_CUESHEET"
             android:layout_alignBaseline="@id/READ_CUESHEET" />
     </RelativeLayout>
 
