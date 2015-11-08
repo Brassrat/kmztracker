@@ -47,11 +47,11 @@ public class MapOverlayer
     private final int color;
     private final List<Marker> markers = new ArrayList<Marker>();
 
-    public MapOverlayer(String appName, Activity mainContext, GoogleMap map)
+    public MapOverlayer(String appName, Activity aActivity, GoogleMap aMap)
     {
-        cueSheet = new CueSheet(appName, mainContext, map);
-        this.mapActivity = mainContext;
-        this.googleMap = map;
+        mapActivity = aActivity;
+        googleMap = aMap;
+        cueSheet = new CueSheet(appName, mapActivity, googleMap);
 
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         // MapController mapController = googleMap.getUiSettings().getController();
@@ -61,7 +61,7 @@ public class MapOverlayer
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(initial_zoom));
 
-        color = mainContext.getResources().getColor(R.color.DodgerBlue);
+        color = mapActivity.getResources().getColor(R.color.DodgerBlue);
     }
 
     public void updateCueSheet(String url)
@@ -354,7 +354,7 @@ public class MapOverlayer
     private float prevBearing;
     private BitmapDrawable prevDrawable;
 
-    public  BitmapDrawable rotateDrawable(int leftId, int rightId, float bearing)
+    public BitmapDrawable rotateDrawable(int leftId, int rightId, float bearing)
     {
         // TODO - use BitmapDescriptorFactory.fromResource(xId) to get the descriptors once
         // then just rotate the Marker ...

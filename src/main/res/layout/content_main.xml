@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.mgjg.kmztracker.MainActivity"
+    android:layout_below="@id/bar"
+    android:paddingTop="60dp"
+    tools:showIn="@layout/activity_main">
+
+    <RelativeLayout
+        android:id="@+id/GPS_INFO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        >
+
+        <ImageView
+            android:id="@+id/GPS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/gps_on_off"/>
+
+        <TextView
+            android:id="@+id/GPS_LAT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lat"
+            tools:text="lat"
+            android:layout_toEndOf="@id/GPS"
+            android:paddingStart="5dp"
+            android:layout_alignBaseline="@id/GPS"/>
+
+        <TextView
+            android:id="@+id/GPS_LON"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lon"
+            tools:text="lon"
+            android:paddingStart="5dp"
+            android:layout_toEndOf="@id/GPS_LAT"
+            android:layout_alignBaseline="@id/GPS"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/CUESHEET_INFO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/GPS_INFO"
+        android:layout_alignParentStart="true"
+        >
+
+        <Button
+            android:id="@+id/READ_CUESHEET"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/load"
+            android:onClick="setCueSheetFromXml"
+            android:labelFor="@+id/CUESHEET"/>
+
+        <EditText
+            android:id="@id/CUESHEET"
+            android:paddingStart="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/file"
+            android:inputType="textUri"
+            android:layout_toEndOf="@id/READ_CUESHEET"
+            android:layout_alignBaseline="@id/READ_CUESHEET"
+            tools:text="https://file"
+            />
+    </RelativeLayout>
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/CUESHEET_INFO"
+        class="com.google.android.gms.maps.MapFragment"
+        android:clickable="true"
+        tools:layout="@android:layout/simple_gallery_item"/>
+
+    <!--
+    <com.google.android.maps.MapView
+        android:id="@+id/mapview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/GPS"
+        android:clickable="true" />
+    -->
+    <!-- 83:30:6D:A2:03:2E:B8:2F:FC:3B:39:4D:63:1E:49:88 -->
+    <!-- E3:6F:8A:33:8B:AB:89:26:82:DF:1A:7E:C3:AA:D0 -->
+</RelativeLayout>

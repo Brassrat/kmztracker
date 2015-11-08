@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="title_first_section">
+        <EditTextPreference
+            android:key="username"
+            android:summary="Please provide your username"
+            android:title="Your Name"></EditTextPreference>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="applicationUpdates"
+            android:summary="This option if selected will allow the application to check for latest versions."
+            android:title="Application Updates"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="title_second_section">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/listArray"
+            android:entryValues="@array/listValues"
+            android:key="downloadType"
+            android:summary="Select the kind of data that you would like to download"
+            android:title="Download Details"/>
+        <SwitchPreference>
+
+        </SwitchPreference>
+    </PreferenceCategory>
+</PreferenceScreen>

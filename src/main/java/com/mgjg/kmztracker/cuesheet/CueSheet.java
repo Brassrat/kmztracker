@@ -14,6 +14,7 @@ import com.mgjg.kmztracker.map.Placemark;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A list of Placemarks, each Placemark indicates a place on the route. The route consists of lines connecting the
@@ -32,7 +33,7 @@ public class CueSheet
     private final int location_icon;
 
     private String trackName = "";
-    private final ArrayList<Placemark> placemarks = new ArrayList<Placemark>();
+    private final List<Placemark> placemarks = new ArrayList<Placemark>();
 
     private Location NorthWestCorner;
     private Location SouthEastCorner;
@@ -241,13 +242,17 @@ public class CueSheet
         //addMarkers(color);
     }
 
+    public void clearMap()
+    {
+        map.clear();
+    }
+
     /**
      * @param color
      */
     @SuppressWarnings("unused")
     public void drawRoute(int color)
     {
-        map.clear();
         map.addPolyline(new PolylineOptions()
                 .color(mapColor(color))
                 .width(5)

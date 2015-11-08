@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?><!-- E3:6F:8A:33:8B:AB:89:26:82:DF:1A:7E:C3:AA:D0 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
 
     <ImageView
         android:id="@+id/GPS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/gps_on_off" />
+        android:contentDescription="@string/gps_on_off"/>
 
     <TextView
         android:id="@+id/GPS_LAT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/GPS" />
+        android:layout_toRightOf="@id/GPS"/>
 
     <TextView
         android:id="@+id/GPS_LON"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/GPS_LAT" />
+        android:layout_toRightOf="@id/GPS_LAT"/>
 
     <fragment
         android:id="@+id/map"
@@ -27,7 +27,7 @@
         android:layout_height="fill_parent"
         android:layout_below="@id/GPS"
         class="com.google.android.gms.maps.MapFragment"
-        android:clickable="true" />
+        android:clickable="true"/>
 
     <!--
     <com.google.android.maps.MapView

@@ -8,9 +8,6 @@ import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
-import com.mgjg.kmztracker.cuesheet.parser.CueSheetKmlParser;
-import com.mgjg.kmztracker.cuesheet.parser.CueSheetParser;
-import com.mgjg.kmztracker.cuesheet.parser.CueSheetXmlParser;
 
 import java.util.UnknownFormatConversionException;
 
@@ -45,23 +42,24 @@ public class CueSheetService extends IntentService
         CueSheetParser parser;
         try
         {
-        if (urlString.endsWith(".kml"))
-        {
-            parser = new CueSheetKmlParser(urlString);
-        }
-        else if (urlString.endsWith(".xml"))
-        {
-            parser = new CueSheetXmlParser(urlString);
-        }
-        else if (urlString.endsWith(".gpx"))
-        {
-            parser = new CueSheetGpxParser(urlString);
-        }
-        else
-        {
-            throw new UnknownFormatConversionException(urlString);
-        }
+            if (urlString.endsWith(".kml"))
+            {
+                parser = new CueSheetKmlParser(urlString);
+            }
+            else if (urlString.endsWith(".xml"))
+            {
+                parser = new CueSheetXmlParser(urlString);
+            }
+            else if (urlString.endsWith(".gpx"))
+            {
+                parser = new CueSheetGpxParser(urlString);
+            }
+            else
+            {
+                throw new UnknownFormatConversionException(urlString);
+            }
 
+            cueSheet.clear();
             parser.parse(cueSheet);
 
       /* Set the result to be displayed in our GUI. */
@@ -73,6 +71,7 @@ public class CueSheetService extends IntentService
                 @Override
                 public void run()
                 {
+                    cueSheet.clearMap();
                     cueSheet.drawRoute(color);
                 }
             });

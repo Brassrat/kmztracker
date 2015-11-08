@@ -36,6 +36,7 @@ public class CueSheetParserFactory
                 URL url = new URL(urlString);
 
                 final URLConnection conn = url.openConnection();
+                conn.setConnectTimeout(10 * 1000);
                 conn.setReadTimeout(15 * 1000); // timeout for reading the google maps data: 15 secs
                 conn.connect();
                 return url;
@@ -92,6 +93,7 @@ public class CueSheetParserFactory
                     throw new UnknownFormatConversionException(urlString);
                 }
 
+                cueSheet.clear();
                 parser.parse(cueSheet);
 
       /* Set the result to be displayed in our GUI. */
@@ -103,6 +105,7 @@ public class CueSheetParserFactory
                     @Override
                     public void run()
                     {
+                        cueSheet.clearMap();
                         cueSheet.drawRoute(color);
                     }
                 });

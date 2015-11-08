@@ -2,8 +2,11 @@ package com.mgjg.kmztracker;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -14,7 +17,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Marker;
 import com.mgjg.kmztracker.map.MapOverlayer;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback
 {
 
     public static final String APP = "com.mgjg.kmztracker";
@@ -42,16 +45,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         {
             setContentView(R.layout.activity_main);
         }
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        // Gets the MapView from the XML layout and creates it
-        // mapView = (MapView) v.findViewById(R.id.mapview);
-        // mapView.onCreate(savedInstanceState);
-        //
-        // // Gets to GoogleMap from the MapView and does initialization stuff
-        // map = mapView.getMap();
-        MapFragment frag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        frag.getMapAsync(this);
+        setupMap();
 
+    }
+
+    private static boolean ADD_MAP = true;
+
+    private void setupMap()
+    {
+
+        if (ADD_MAP)
+        {
+            // Gets the MapView from the XML layout and creates it
+            // mapView = (MapView) v.findViewById(R.id.mapview);
+            // mapView.onCreate(savedInstanceState);
+            //
+            // // Gets to GoogleMap from the MapView and does initialization stuff
+            // map = mapView.getMap();
+            MapFragment frag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+            frag.getMapAsync(this);
+
+        }
         for (int ii : frontViews)
         {
             View vv = findViewById(ii);
@@ -129,15 +146,55 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void showToast(String text)
     {
-        Toast.makeText(getApplicationContext(), text,
-                Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_main_actions, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * On selecting action bar icons
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // Take appropriate action for each action item click
+        switch (item.getItemId())
+        {
+            case R.id.action_search:
+                // search action
+                return true;
+            case R.id.action_location_found:
+                // location found
+                LocationFound();
+                return true;
+            case R.id.action_refresh:
+                // refresh
+                return true;
+            case R.id.action_help:
+                // help action
+                return true;
+            case R.id.action_check_updates:
+                // check for updates action
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Launching new activity
+     */
+    private void LocationFound()
+    {
+        // Intent i = new Intent(MainActivity.this, LocationFound.class);
+        //startActivity(i);
     }
 
     /**
@@ -175,5 +232,4 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     // {
     // return false;
     // }
-
 }

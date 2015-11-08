@@ -170,6 +170,7 @@ public class Placemark
 
     /**
      * compare latitudes, 'less than, i.e. <0) means this point is WEST of other point
+     *
      * @param other
      * @return
      */
@@ -199,6 +200,7 @@ public class Placemark
 
     /**
      * compare longitudes, 'less than (<0)' means point is SOUTH of other point
+     *
      * @param other
      * @return
      */

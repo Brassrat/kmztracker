@@ -3,7 +3,6 @@ package com.mgjg.kmztracker.cuesheet.parser;
 import android.util.Log;
 
 import com.mgjg.kmztracker.cuesheet.CueSheet;
-import com.mgjg.kmztracker.map.Placemark;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -13,8 +12,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -133,7 +130,7 @@ public class CueSheetGpxParser extends CueSheetParserFactory.CueSheetFactory
                 {
                     Element ee = knownTags.get(localName);
                     Class<? extends Element> cc = ee.getClass();
-                    Constructor<? extends Element> cons = cc.getConstructor(new Class[] { CueSheetGpxParser.class});
+                    Constructor<? extends Element> cons = cc.getConstructor(new Class[]{CueSheetGpxParser.class});
                     newElement = cons.newInstance(CueSheetGpxParser.this);
                     //newElement = knownTags.get(localName).getClass().getConstructor().newInstance();
                 }
