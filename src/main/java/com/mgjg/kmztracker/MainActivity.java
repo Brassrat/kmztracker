@@ -1,7 +1,12 @@
 package com.mgjg.kmztracker;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,6 +21,11 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Marker;
 import com.mgjg.kmztracker.map.MapOverlayer;
+import com.mgjg.kmztracker.preference.MapPreferencesActivity;
+
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback
 {
@@ -104,7 +114,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // .fromResource(R.drawable.ic_launcher)));
 
         map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED)
+        {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+        }
+        else
+        {
+            map.setMyLocationEnabled(true);
+        }
 
         // // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
         // try {
@@ -153,39 +177,66 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onCreateOptionsMenu(Menu menu)
     {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_main_actions, menu);
+        inflater.inflate(R.menu.activity_main, menu);
+        //inflater.inflate(R.menu.activity_main_actions, menu);
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // Take appropriate action for each action item click
+        final boolean result;
+        switch (item.getItemId())
+        {
+            case R.id.menu_settings:
+                // settings
+                // launch preference activity
+                Intent ii = new Intent(this, MapPreferencesActivity.class);
+                startActivity(ii);
+                result = true;
+                break;
+            default:
+                result = super.onOptionsItemSelected(item);
+                break;
+        }
+        return result;
     }
 
     /**
      * On selecting action bar icons
      */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    private boolean onActivityMainActionsOptionsItemSelected(MenuItem item)
     {
         // Take appropriate action for each action item click
+        final boolean result;
         switch (item.getItemId())
         {
             case R.id.action_search:
                 // search action
-                return true;
+                result = true;
+                break;
             case R.id.action_location_found:
                 // location found
                 LocationFound();
-                return true;
+                result = true;
+                break;
             case R.id.action_refresh:
                 // refresh
-                return true;
+                result = true;
+                break;
             case R.id.action_help:
                 // help action
-                return true;
+                result = true;
+                break;
             case R.id.action_check_updates:
                 // check for updates action
-                return true;
+                result = true;
+                break;
             default:
-                return super.onOptionsItemSelected(item);
+                result = super.onOptionsItemSelected(item);
         }
+        return result;
     }
 
     /**
@@ -204,25 +255,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     public void setCueSheetFromXml(View vv)
     {
-        EditText et = (EditText) findViewById(R.id.CUESHEET);
-        CharSequence seq = et.getText();
-        String url = seq.toString();
-        if (url.isEmpty())
-        {
-            //url = "http://10.0.2.2:8888/kml/test.kml";
-            //url = "http://192.168.1.2:8080/kml/test.kml";
-            url = "http://192.168.1.2:9999/gpx/test.kml";
-        }
-        else if ("gpx".equalsIgnoreCase(url) || "test".equalsIgnoreCase(url) || "file".equalsIgnoreCase(url))
-        {
-            url = "http://192.168.1.2:9999/gpx/test.gpx";
-        }
-        else if ("kml".equalsIgnoreCase(url))
-        {
-            url = "http://192.168.1.2:8080/kml/test.kml";
-        }
         if (null != locLstnr)
         {
+            EditText et = (EditText) findViewById(R.id.CUESHEET);
+            String url = et.getText().toString();
+            if (url.isEmpty())
+            {
+                url = getString(R.string.map_file);
+            }
+            // get current preference for serverIP
+            SharedPreferences prefs = getSharedPreferences("general_settings", Context.MODE_PRIVATE);
+            String lanSettings = prefs.getString("serverIP", null);
+            url = lanSettings + "/" + url;
+            if (url.indexOf('.') < 0)
+            {
+                url += (lanSettings.endsWith("gpx") ? ".gpx" : ".kml");
+            }
             locLstnr.updateCueSheet(url);
         }
     }

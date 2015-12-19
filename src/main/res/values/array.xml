@@ -1,13 +1,11 @@
 <resources>
-    <string-array name="listArray">
-        <item>Headings</item>
-        <item>Headings and Details</item>
-        <item>All Data</item>
+    <string-array name="MapFileServers">
+        <item>Local Gpx Files</item>
+        <item>Local Kml Files</item>
     </string-array>
 
-    <string-array name="listValues">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
+    <string-array name="MapFileValues">
+        <item>@string/local_net_gpx_server</item>
+        <item>@string/local_net_kml_server</item>
     </string-array>
 </resources>

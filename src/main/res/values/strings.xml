@@ -1,20 +1,26 @@
 <resources>
     <string name="app_name">KmzTracker</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">Kmz Tracker</string>
     <string name="gps_on_off">GPS ON/OFF</string>
     <string name="lon">LON</string>
     <string name="load">load</string>
-    <string name="kml">http://192.168.1.2:8080/kml/test.kml</string>
-    <string name="gpx">http://192.168.1.2:9999/gpx/test.gpx</string>
-    <string name="file">@string/gpx</string>
     <string name="lat">LAT</string>
     <string name="action_check_updates">Check For Updates</string>
     <string name="action_help">Help</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_location_found">Location Found</string>
     <string name="action_search">Search</string>
-
+    <string name="map_file">test</string>
+    <string name="local_net_gpx_server">http://192.168.1.2:9999/gpx</string>
+    <string name="local_net_kml_server">http://192.168.1.2:8080/kml</string>
+    <string name="ToolsMapFile">MapFile</string>
+    <string name="user_info">User Info</string>
+    <string name="user_name">username</string>
+    <string name="user_title">Your Name</string>
+    <string name="map_file_server">Map File Server</string>
+    <string name="select_map_server">Select the Map File Server</string>
+    <string name="map_file_servers">Map File Servers</string>
+    <string name="map_server_ip">serverIP</string>
 </resources>

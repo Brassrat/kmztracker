@@ -64,11 +64,11 @@
             android:paddingStart="10dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/file"
-            android:inputType="textUri"
+            android:text="@string/map_file"
+            android:inputType="textAutoComplete"
             android:layout_toEndOf="@id/READ_CUESHEET"
             android:layout_alignBaseline="@id/READ_CUESHEET"
-            tools:text="https://file"
+            tools:text="@string/ToolsMapFile"
             />
     </RelativeLayout>
 

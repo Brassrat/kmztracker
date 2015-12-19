@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.mgjg.pt.MainActivity">
+    tools:context="com.mgjg.kmztracker.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/bar"
@@ -20,6 +20,13 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/xyzzy.PopupOverlay"/>
+
+     <!--
+        android:layout_height="@dimen/abc_action_bar_default_height_material"
+        android:background="@color/primary_dark_material_dark"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        -->
 
     </android.support.design.widget.AppBarLayout>
 
