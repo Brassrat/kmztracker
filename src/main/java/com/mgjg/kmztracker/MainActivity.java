@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,9 +22,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.mgjg.kmztracker.map.MapOverlayer;
 import com.mgjg.kmztracker.preference.MapPreferencesActivity;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback
 {
@@ -114,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // .fromResource(R.drawable.ic_launcher)));
 
         map.getUiSettings().setMyLocationButtonEnabled(false);
-        if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED)
+        if ((ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) ||
+                (ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED))
         {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -124,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-        }
-        else
-        {
             map.setMyLocationEnabled(true);
         }
 

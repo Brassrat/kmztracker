@@ -1,10 +1,14 @@
 <resources>
     <string-array name="MapFileServers">
-        <item>Local Gpx Files</item>
-        <item>Local Kml Files</item>
+        <item>GPX Files</item>
+        <item>KML Files</item>
+        <item>Local GPX Files</item>
+        <item>Local KML Files</item>
     </string-array>
 
     <string-array name="MapFileValues">
+        <item>@string/mgjg_gpx_server</item>
+        <item>@string/mgjg_kml_server</item>
         <item>@string/local_net_gpx_server</item>
         <item>@string/local_net_kml_server</item>
     </string-array>

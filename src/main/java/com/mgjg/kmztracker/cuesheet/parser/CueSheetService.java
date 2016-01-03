@@ -2,14 +2,22 @@ package com.mgjg.kmztracker.cuesheet.parser;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 
 import java.util.UnknownFormatConversionException;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * Created by marianne on 1/3/2015.
@@ -81,5 +89,38 @@ public class CueSheetService extends IntentService
             Log.e(TAG, "unable to process url(" + urlString + ") because " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void setupTurnNotification(LatLng point)
+    {
+        if ((ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) ||
+                (ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED))
+        {
+
+            // This intent will call the activity ProximityActivity
+            Intent proximityIntent = new Intent("in.wptrafficanalyzer.activity.proximity");
+
+// Creating a pending intent which will be invoked by LocationManager when the specified region is
+// entered or exited
+            PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, proximityIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+// Setting proximity alert
+// The pending intent will be invoked when the device enters or exits the region 20 meters
+// away from the marked point
+// The -1 indicates that, the monitor will not be expired
+            // Getting LocationManager object from System Service
+            // LOCATION_SERVICE
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            locationManager.addProximityAlert(point.latitude, point.longitude, 20, -1, pendingIntent);
+        }
+
     }
 }

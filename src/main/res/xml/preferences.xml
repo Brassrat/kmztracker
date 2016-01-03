@@ -3,6 +3,7 @@
     <PreferenceCategory
         android:title="@string/user_info">
         <EditTextPreference
+            android:id="@+id/userName"
             android:key="@string/user_name"
             android:summary="Please provide your username"
             android:title="@string/user_title"/>
@@ -17,12 +18,13 @@
     <PreferenceCategory
         android:title="@string/map_file_server">
         <ListPreference
+            android:id="@+id/fileServer"
             android:entries="@array/MapFileServers"
             android:entryValues="@array/MapFileValues"
             android:key="@string/map_server_ip"
             android:summary="@string/select_map_server"
             android:title="@string/map_file_servers"
-            android:defaultValue="@string/local_net_gpx_server"
+            android:defaultValue="@string/mgjg_gpx_server"
             />
         <!--
         <SwitchPreference>
