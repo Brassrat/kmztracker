@@ -2,6 +2,7 @@ package com.mgjg.kmztracker.cuesheet.parser;
 
 import android.util.Log;
 
+import com.mgjg.kmztracker.MainActivity;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class CueSheetParserFactory
       /* Set the result to be displayed in our GUI. */
                 Log.d(cueSheet.getAppName(), "CueSheet: " + cueSheet.toString());
 
-                cueSheet.runOnUi(new Runnable()
+                MainActivity.runOnUi(new Runnable()
                 {
 
                     @Override

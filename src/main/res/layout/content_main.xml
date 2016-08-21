@@ -9,11 +9,12 @@
     android:paddingTop="60dp"
     tools:showIn="@layout/activity_main">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/GPS_INFO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
+        android:orientation="horizontal"
         >
 
         <ImageView
@@ -28,9 +29,9 @@
             android:layout_height="wrap_content"
             android:text="@string/lat"
             tools:text="lat"
-            android:layout_toEndOf="@id/GPS"
+            android:paddingEnd="5dp"
             android:paddingStart="5dp"
-            android:layout_alignBaseline="@id/GPS"/>
+            />
 
         <TextView
             android:id="@+id/GPS_LON"
@@ -38,17 +39,18 @@
             android:layout_height="wrap_content"
             android:text="@string/lon"
             tools:text="lon"
+            android:paddingEnd="5dp"
             android:paddingStart="5dp"
-            android:layout_toEndOf="@id/GPS_LAT"
-            android:layout_alignBaseline="@id/GPS"/>
-    </RelativeLayout>
+            />
+    </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/CUESHEET_INFO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/GPS_INFO"
         android:layout_alignParentStart="true"
+        android:orientation="horizontal"
         >
 
         <Button
@@ -61,22 +63,50 @@
 
         <EditText
             android:id="@id/CUESHEET"
+            android:paddingEnd="10dp"
             android:paddingStart="10dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/map_file"
             android:inputType="textAutoComplete"
-            android:layout_toEndOf="@id/READ_CUESHEET"
-            android:layout_alignBaseline="@id/READ_CUESHEET"
             tools:text="@string/ToolsMapFile"
             />
-    </RelativeLayout>
-
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/CUESHEET_MOVE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/CUESHEET_INFO"
+        android:layout_alignParentStart="true"
+        android:orientation="horizontal"
+        >
+        <Button
+            android:id="@+id/MOVE_START"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start"
+            android:onClick="moveToStart"
+            />
+        <Button
+            android:id="@+id/MOVE_NEXT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next"
+            android:onClick="moveNext"
+            />
+        <Button
+            android:id="@+id/MOVE_END"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/end"
+            android:onClick="moveToEnd"
+            />
+        </LinearLayout>
     <fragment
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/CUESHEET_INFO"
+        android:layout_below="@id/CUESHEET_MOVE"
         class="com.google.android.gms.maps.MapFragment"
         android:clickable="true"
         tools:layout="@android:layout/simple_gallery_item"/>

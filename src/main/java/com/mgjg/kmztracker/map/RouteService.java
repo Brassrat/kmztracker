@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.mgjg.kmztracker.AppResources;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 import com.mgjg.kmztracker.cuesheet.parser.CueSheetParserFactory;
@@ -25,18 +26,18 @@ public class RouteService
     @SuppressWarnings("unused")
     public CueSheet calculateRoute(GoogleMap map, Activity activity, Location start, Location target, int mode)
     {
-        return calculateRoute(map, activity, start.getLatitude() + "," + start.getLongitude(),
+        return calculateRoute(map, start.getLatitude() + "," + start.getLongitude(),
                 target.getLatitude() + "," + target.getLongitude(), mode);
     }
 
     @SuppressWarnings("unused")
     public CueSheet calculateRoute(GoogleMap map, Activity activity, Double startLat, Double startLng, Double targetLat, Double targetLng, int mode)
     {
-        return calculateRoute(map, activity, startLat + "," + startLng, targetLat + "," + targetLng, mode);
+        return calculateRoute(map, startLat + "," + startLng, targetLat + "," + targetLng, mode);
     }
 
     @SuppressWarnings("unused")
-    public CueSheet calculateRoute(GoogleMap map, Activity activity, String startCoords, String targetCoords, int mode)
+    public CueSheet calculateRoute(GoogleMap map, String startCoords, String targetCoords, int mode)
     {
 
         // TODO ... need to change to get driving directions!!!
@@ -50,16 +51,16 @@ public class RouteService
 
         Log.d(appName, "urlCarMode: " + urlCarMode);
 
-        int color = activity.getResources().getColor(R.color.red);
+        int color = AppResources.getColor(R.color.red);
         CueSheet navSet = null;
         // for mode_any: try pedestrian route calculation first, if it fails, fall back to car route
         if (mode == MODE_ANY || mode == MODE_WALKING)
         {
-            navSet = updateCueSheet(new CueSheet(appName, activity, map), urlPedestrianMode, color);
+            navSet = updateCueSheet(new CueSheet(appName, map), urlPedestrianMode, color);
         }
         if (mode == MODE_ANY && navSet == null || mode == MODE_CAR)
         {
-            navSet = updateCueSheet(new CueSheet(appName, activity, map), urlCarMode, color);
+            navSet = updateCueSheet(new CueSheet(appName, map), urlCarMode, color);
         }
         return navSet;
     }

@@ -8,6 +8,8 @@ import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.map.Placemark;
@@ -26,36 +28,62 @@ import java.util.List;
 public class CueSheet
 {
     private final String appName;
-    private final Activity context;
     private final GoogleMap map;
-    private final int start_icon;
-    private final int end_icon;
-    private final int location_icon;
+    private final int startIconId;
+    private final int endIconId;
+    private final int locationIconId;
+    private final int markerIconId;
 
     private String trackName = "";
+    private int lastx;
     private final List<Placemark> placemarks = new ArrayList<Placemark>();
 
     private Location NorthWestCorner;
     private Location SouthEastCorner;
 
-    public CueSheet(String appName, Activity context, GoogleMap map)
+    public CueSheet(String appName, GoogleMap map)
     {
         this.appName = appName;
-        this.context = context;
         this.map = map;
-        start_icon = R.drawable.mm_20_orange;
-        end_icon = R.drawable.finish1;
-        location_icon = R.drawable.mountain_bike_helmet_16;
+        startIconId = R.drawable.mm_20_orange;
+        endIconId = R.drawable.finish1;
+        locationIconId = R.drawable.icon57; // R.drawable.mountain_bike_helmet_16;
+        markerIconId = 0; //R.drawable.icon57;
+        lastx = -1;
     }
 
-    public void runOnUi(Runnable runThis)
+    public Placemark moveToStart()
     {
-        context.runOnUiThread(runThis);
+        synchronized (placemarks)
+        {
+            lastx = placemarks.isEmpty() ?  -1 : 0;
+            return placemarks.isEmpty() ? Placemark.NO_PLACEMARK : placemarks.get(lastx);
+        }
+    }
+
+    public Placemark moveNext()
+    {
+        synchronized (placemarks)
+        {
+            if (++lastx >= placemarks.size())
+            {
+                lastx = placemarks.isEmpty() ? -1 : 0;
+            }
+            return placemarks.isEmpty() ? Placemark.NO_PLACEMARK : placemarks.get(lastx);
+        }
+    }
+
+    public Placemark moveToEnd()
+    {
+        synchronized (placemarks)
+        {
+            lastx = placemarks.isEmpty() ?  -1 : (placemarks.size()-1);
+            return placemarks.isEmpty() ? Placemark.NO_PLACEMARK : placemarks.get(lastx);
+        }
     }
 
     public boolean isEmpty()
     {
-
         synchronized (placemarks)
         {
             return placemarks.isEmpty();
@@ -73,11 +101,6 @@ public class CueSheet
     public String getAppName()
     {
         return appName;
-    }
-
-    public Activity getActivty()
-    {
-        return context;
     }
 
     public String toString()
@@ -266,14 +289,15 @@ public class CueSheet
         Placemark start = null;
         Placemark prev = null;
 
+        MarkerOptions options = new MarkerOptions();
         for (Placemark next : placemarks)
         {
-            //LatLng nextPoint = next.getPoint();
+            Marker marker = null;
             if (null == start)
             {
                 start = next;
                 Log.d(appName, "start: " + start.toString());
-                start.addMarker(map, start_icon);
+                marker = start.addMarker(map, startIconId);
             }
             else if (next == start)
             {
@@ -281,7 +305,7 @@ public class CueSheet
                 // add if it has a marker and is on screen
                 Log.d(appName, "loop end: " + next.toString());
             }
-            else if (null != prev)
+            else
             {
                 // draw line
                 Log.d(appName, "line:" + prev.toString() + " TO " + next.toString());
@@ -293,8 +317,16 @@ public class CueSheet
                 // mapOverlays.add(new RouteOverlay.MarkOverlay(nextPoint).withText(next.getTitle()));
                 if (next.getTitle() != null)
                 {
-                    next.addMarker(map, location_icon);
+                    marker = next.addMarker(map, locationIconId);
                 }
+                else if (markerIconId > 0)
+                {
+                    marker = next.addMarker(map, markerIconId);
+                }
+            }
+            if (null != marker)
+            {
+                marker.setPosition(start.getLatLng());
             }
             prev = next;
         }
@@ -302,8 +334,9 @@ public class CueSheet
         // if path is not a loop
         if ((null != prev) && (!prev.equals(start)))
         {
-            prev.addMarker(map, end_icon);// END
+            prev.addMarker(map, endIconId);// END
         }
+
     }
 
     public void addPlacemark(Placemark placemark)

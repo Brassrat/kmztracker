@@ -32,10 +32,15 @@ public class MapPreferencesActivity extends PreferenceActivity
             final int key = R.string.map_server_preference;
             final String prefName = AppPreferences.getInstance().getIdentifier(key);
             String value = Preferences.getString(prefName, "");
-            if (!value.isEmpty() && (pref instanceof ListPreference))
+            if (!value.isEmpty())
             {
-                int ii = ((ListPreference) pref).findIndexOfValue(value);
-                ((ListPreference) pref).setValueIndex(ii);
+                String summary = "current: " + value;
+                pref.setSummary(summary);
+                if (pref instanceof ListPreference)
+                {
+                    int ii = ((ListPreference) pref).findIndexOfValue(value);
+                    ((ListPreference) pref).setValueIndex(ii);
+                }
             }
             pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
             {

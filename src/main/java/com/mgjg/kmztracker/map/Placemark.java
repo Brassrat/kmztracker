@@ -10,6 +10,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class Placemark
 {
+    public final static Placemark NO_PLACEMARK = new Placemark(new LatLng(0,0), 0, null, null);
+
     private Marker marker;
     private final LatLng point;
     private final double altitude;

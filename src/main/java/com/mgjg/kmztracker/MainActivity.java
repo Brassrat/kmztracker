@@ -1,9 +1,7 @@
 package com.mgjg.kmztracker;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,12 +19,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Marker;
 import com.mgjg.kmztracker.map.MapOverlayer;
 import com.mgjg.kmztracker.preference.MapPreferencesActivity;
+import com.mgjg.kmztracker.preference.Preferences;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback
+public class MainActivity extends AppCompatActivity
 {
 
     public static final String APP = "com.mgjg.kmztracker";
@@ -38,6 +37,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int[] frontViews = new int[]{R.id.GPS, R.id.GPS_LAT, R.id.GPS_LON,
             R.id.READ_CUESHEET, R.id.CUESHEET};
+
+
+    private static Activity mainActivity;
+
+    public MainActivity()
+    {
+        mainActivity = this;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -68,15 +75,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (ADD_MAP)
         {
-            // Gets the MapView from the XML layout and creates it
-            // mapView = (MapView) v.findViewById(R.id.mapview);
-            // mapView.onCreate(savedInstanceState);
-            //
-            // // Gets to GoogleMap from the MapView and does initialization stuff
-            // map = mapView.getMap();
+            // Gets to fragment for the GoogleMap from the View and does initialization stuff
+            // note, this is done asynchronously
             MapFragment frag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-            frag.getMapAsync(this);
-
+            frag.getMapAsync(new OnMapReady());
         }
         for (int ii : frontViews)
         {
@@ -88,50 +90,51 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    @Override
-    public void onMapReady(GoogleMap theMap)
+    private class OnMapReady implements OnMapReadyCallback
     {
-        this.map = theMap;
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
-                                     {
-
-                                         @Override
-                                         public boolean onMarkerClick(Marker marker)
-                                         {
-                                             return false;
-                                         }
-
-                                     }
-        );
-        // Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG)
-        // .title("Hamburg"));
-        // Marker kiel = map.addMarker(new MarkerOptions()
-        // .position(KIEL)
-        // .title("Kiel")
-        // .snippet("Kiel is cool")
-        // .icon(BitmapDescriptorFactory
-        // .fromResource(R.drawable.ic_launcher)));
-
-        map.getUiSettings().setMyLocationButtonEnabled(false);
-        if ((ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) ||
-                (ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED))
+        @Override
+        public void onMapReady(GoogleMap googleMap)
         {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            map.setMyLocationEnabled(true);
-        }
+            map = googleMap;
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+                                         {
+                                             @Override
+                                             public boolean onMarkerClick(Marker marker)
+                                             {
+                                                 return false;
+                                             }
 
-        // // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
-        // try {
-        // MapsInitializer.initialize(this.getActivity());
-        // } catch (GooglePlayServicesNotAvailableException e) {
-        // e.printStackTrace();
-        // }
+                                         }
+            );
+            // Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG)
+            // .title("Hamburg"));
+            // Marker kiel = map.addMarker(new MarkerOptions()
+            // .position(KIEL)
+            // .title("Kiel")
+            // .snippet("Kiel is cool")
+            // .icon(BitmapDescriptorFactory
+            // .fromResource(R.drawable.ic_launcher)));
+
+            map.getUiSettings().setMyLocationButtonEnabled(false);
+            if ((ActivityCompat.checkSelfPermission(MainActivity.this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) ||
+                    (ActivityCompat.checkSelfPermission(MainActivity.this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED))
+            {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                map.setMyLocationEnabled(true);
+            }
+
+            // // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
+            // try {
+            // MapsInitializer.initialize(this.getActivity());
+            // } catch (GooglePlayServicesNotAvailableException e) {
+            // e.printStackTrace();
+            // }
         /*
         LatLng sydney = new LatLng(-33.867, 151.206);
 
@@ -143,7 +146,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .snippet("The most populous city in Australia.")
                 .position(sydney));
         */
-        locLstnr = new LocationTracker(this, new MapOverlayer(MainActivity.APP, this, map));
+            locLstnr = new LocationTracker(new MapOverlayer(MainActivity.APP, map));
+        }
     }
 
     @SuppressWarnings("unused")
@@ -164,9 +168,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void showToast(String text)
+    public static void showToast(String text)
     {
-        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getInstance().getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -260,14 +264,44 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 url = getString(R.string.map_file);
             }
             // get current preference for serverIP
-            SharedPreferences prefs = getSharedPreferences("general_settings", Context.MODE_PRIVATE);
-            String lanSettings = prefs.getString("serverIP", null);
-            url = lanSettings + "/" + url;
+            final int key = R.string.map_server_preference;
+            final String prefName = AppPreferences.getInstance().getIdentifier(key);
+            String lanSettings = Preferences.getString(prefName, "");
+            //SharedPreferences prefs = getSharedPreferences("general_settings", Context.MODE_PRIVATE);
+            //String lanSettings = prefs.getString("serverIP", null);
             if (url.indexOf('.') < 0)
             {
                 url += (lanSettings.endsWith("gpx") ? ".gpx" : ".kml");
             }
+            url = lanSettings + "/" + url;
             locLstnr.updateCueSheet(url);
+        }
+    }
+
+    public void moveToStart(View vv)
+    {
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
+        if (null != locLstnr)
+        {
+            locLstnr.moveToStart();
+        }
+    }
+
+    public void moveNext(View vv)
+    {
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
+        if (null != locLstnr)
+        {
+            locLstnr.moveNext();
+        }
+    }
+
+    public void moveToEnd(View vv)
+    {
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
+        if (null != locLstnr)
+        {
+            locLstnr.moveToEnd();
         }
     }
 
@@ -276,4 +310,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // {
     // return false;
     // }
+
+    public static void runOnUi(Runnable runThis)
+    {
+        MainActivity.getInstance().runOnUiThread(runThis);
+    }
+
+    public static Activity getInstance()
+    {
+        return mainActivity;
+    }
+
+    public static boolean hasLocationPermission()
+    {
+        return ((ActivityCompat.checkSelfPermission(MainActivity.getInstance(), ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) ||
+                (ActivityCompat.checkSelfPermission(MainActivity.getInstance(), ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED));
+    }
+
 }

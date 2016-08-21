@@ -15,8 +15,9 @@ public class KmzTrackerApp extends Application
         AppPreferences.makeInstance(this);
     }
 
-    KmzTrackerApp getInstance()
+    public KmzTrackerApp getInstance()
     {
         return instance;
     }
+
 }

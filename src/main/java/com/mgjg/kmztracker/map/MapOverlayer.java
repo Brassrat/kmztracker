@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mgjg.kmztracker.AppResources;
 import com.mgjg.kmztracker.R;
 import com.mgjg.kmztracker.cuesheet.CueSheet;
 import com.mgjg.kmztracker.cuesheet.parser.CueSheetParserFactory;
@@ -41,17 +42,15 @@ public class MapOverlayer
     private int initial_zoom = 12;
 
     private CueSheet cueSheet;
-    private final Activity mapActivity;
     private final GoogleMap googleMap;
     private Marker locationMarker;
     private final int color;
     private final List<Marker> markers = new ArrayList<Marker>();
 
-    public MapOverlayer(String appName, Activity aActivity, GoogleMap aMap)
+    public MapOverlayer(String appName, GoogleMap aMap)
     {
-        mapActivity = aActivity;
         googleMap = aMap;
-        cueSheet = new CueSheet(appName, mapActivity, googleMap);
+        cueSheet = new CueSheet(appName, googleMap);
 
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         // MapController mapController = googleMap.getUiSettings().getController();
@@ -61,7 +60,7 @@ public class MapOverlayer
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(initial_zoom));
 
-        color = mapActivity.getResources().getColor(R.color.DodgerBlue);
+        color = AppResources.getColor(R.color.DodgerBlue);
     }
 
     public void updateCueSheet(String url)
@@ -69,17 +68,24 @@ public class MapOverlayer
         RouteService.updateCueSheet(cueSheet, url, color);
     }
 
-    public boolean isRouteDisplayed()
+    public void moveToStart()
     {
-        return (null != cueSheet) && !cueSheet.isEmpty();
+        mvPoint(cueSheet.moveToStart());
     }
 
-    public void setCueSheetFromXml(String url)
+    public void moveNext()
     {
-        cueSheet.clear();
-        Log.d(cueSheet.getAppName(), "parsing urlString " + url);
-        // TODO - remove overlay???
-        CueSheetParserFactory.parseUrl(cueSheet, url, color);
+        mvPoint(cueSheet.moveNext());
+    }
+
+    public void moveToEnd()
+    {
+        mvPoint(cueSheet.moveToEnd());
+    }
+
+    public LatLng mvPoint(Placemark placemark)
+    {
+        return (placemark != Placemark.NO_PLACEMARK) ? mvPoint(placemark.getLatLng()) : null;
     }
 
     public LatLng mvPoint(Location loc)
@@ -91,11 +97,6 @@ public class MapOverlayer
     {
         return mvPoint(new LatLng(lat, lon));
     }
-
-    // private LatLng mvPoint(int lat, int lon)
-    // {
-    // return mvPoint(new LatLng(lat, lon));
-    // }
 
     private LatLng mvPoint(final LatLng newPoint)
     {
@@ -328,7 +329,7 @@ public class MapOverlayer
 
     public BitmapDescriptor drawableToIcon(int drawId)
     {
-        return BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(mapActivity.getResources(), drawId));
+        return BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(AppResources.getResources(), drawId));
     }
 
     public BitmapDescriptor drawableToIcon(Drawable draw)
@@ -365,7 +366,7 @@ public class MapOverlayer
         {
             // Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), drawId);
             // Drawable drawable = getResources().getDrawable(drawId);
-            Bitmap bitMap = BitmapFactory.decodeResource(mapActivity.getResources(), drawId);
+            Bitmap bitMap = BitmapFactory.decodeResource(AppResources.getResources(), drawId, null);
             // Create blank bitmap of equal size
             Bitmap canvasBitmap = bitMap.copy(Bitmap.Config.ARGB_8888, true);
             canvasBitmap.eraseColor(0x00000000);
@@ -385,7 +386,7 @@ public class MapOverlayer
             prevDrawId = drawId;
             prevBearing = bearing;
             // prevDrawable = new BitmapDrawable(canvasBitmap);
-            prevDrawable = new BitmapDrawable(this.mapActivity.getResources(), canvasBitmap);
+            prevDrawable = new BitmapDrawable(AppResources.getResources(), canvasBitmap);
         }
         return prevDrawable;
     }
