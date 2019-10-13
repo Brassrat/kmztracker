@@ -13,16 +13,15 @@ import android.content.Intent
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.NotificationCompat
 import android.widget.Toast
 
 import com.mgjg.kmztracker.R
 
-class ProximityActivity : Activity() {
+abstract class ProximityActivity : Activity() {
 
-  internal var notificationTitle: String
-  internal var notificationContent: String
-  internal var tickerMessage: String
+  private lateinit var notificationTitle: String
+  private lateinit var notificationContent: String
+  private lateinit var tickerMessage: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // TODO Auto-generated method stub

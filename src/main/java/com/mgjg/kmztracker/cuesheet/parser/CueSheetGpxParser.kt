@@ -1,22 +1,15 @@
 package com.mgjg.kmztracker.cuesheet.parser
 
 import android.util.Log
-
 import com.mgjg.kmztracker.cuesheet.CueSheet
-
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
-import org.xml.sax.XMLReader
 import org.xml.sax.helpers.DefaultHandler
-
 import java.io.IOException
-import java.lang.reflect.Constructor
 import java.lang.Double.parseDouble
-import java.util.HashMap
-
+import java.util.*
 import javax.xml.parsers.ParserConfigurationException
-import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 
 class CueSheetGpxParser internal constructor(url: String) :
@@ -61,15 +54,15 @@ class CueSheetGpxParser internal constructor(url: String) :
     private val knownTags = HashMap<String, Element>()
 
     init {
-      knownTags.put("gpx", ElementGPX())
-      knownTags.put("author", ElementAUTHOR())
-      knownTags.put("url", ElementURL())
-      knownTags.put("time", ElementTIME())
-      knownTags.put("trk", ElementTRK())
-      knownTags.put("name", ElementNAME())
-      knownTags.put("trkseg", ElementTRKSEG())
-      knownTags.put("trkpt", ElementTRKPT())
-      knownTags.put("ele", ElementELE())
+      knownTags["gpx"] = ElementGPX()
+      knownTags["author"] = ElementAUTHOR()
+      knownTags["url"] = ElementURL()
+      knownTags["time"] = ElementTIME()
+      knownTags["trk"] = ElementTRK()
+      knownTags["name"] = ElementNAME()
+      knownTags["trkseg"] = ElementTRKSEG()
+      knownTags["trkpt"] = ElementTRKPT()
+      knownTags["ele"] = ElementELE()
     }
 
     fun addTrk(name: String) {
@@ -109,11 +102,14 @@ class CueSheetGpxParser internal constructor(url: String) :
     ) {
       var newElement: Element? = null
       if (knownTags.containsKey(localName)) {
+        val ee = knownTags[localName]!!
         try {
-          val ee = knownTags[localName]
-          val cc = ee.javaClass
-          val cons = cc.getConstructor(*arrayOf<Class<*>>(CueSheetGpxParser::class.java))
-          newElement = cons.newInstance(this@CueSheetGpxParser)
+          val cc = ee::class
+          val ccc = cc.constructors.first()
+          //val ccc = cc.primaryConstructor
+          newElement = ccc.call(this@CueSheetGpxParser)
+          //val cons = cc.getConstructor(CueSheetGpxParser::class.java)
+          //newElement = cons.newInstance(this@CueSheetGpxParser)
           //newElement = knownTags.get(localName).getClass().getConstructor().newInstance();
         } catch (e: Exception) {
           newElement = null
@@ -122,29 +118,21 @@ class CueSheetGpxParser internal constructor(url: String) :
       }
 
       if (newElement == null) {
-        if ("gpx" == localName) {
-          newElement = ElementGPX()
-        } else if ("author" == localName) {
-          newElement = ElementAUTHOR()
-        } else if ("url" == localName) {
-          newElement = ElementURL()
-        } else if ("time" == localName) {
-          newElement = ElementTIME()
-        } else if ("trk" == localName) {
-          newElement = ElementTRK()
-        } else if ("name" == localName) {
-          newElement = ElementNAME()
-        } else if ("trkseg" == localName) {
-          newElement = ElementTRKSEG()
-        } else if ("trkpt" == localName) {
-          newElement = ElementTRKPT()
-        } else if ("ele" == localName) {
-          newElement = ElementELE()
+        when (localName) {
+          "gpx" -> newElement = ElementGPX()
+          "author" -> newElement = ElementAUTHOR()
+          "url" -> newElement = ElementURL()
+          "time" -> newElement = ElementTIME()
+          "trk" -> newElement = ElementTRK()
+          "name" -> newElement = ElementNAME()
+          "trkseg" -> newElement = ElementTRKSEG()
+          "trkpt" -> newElement = ElementTRKPT()
+          "ele" -> newElement = ElementELE()
         }
       }
 
       if (null == newElement) {
-        Log.i(cueSheet.appName, "Unknown tag, ignore: " + localName)
+        Log.i(cueSheet.appName, "Unknown tag, ignore: $localName")
         newElement = ElementNOTAG()
       }
 
@@ -451,7 +439,7 @@ class CueSheetGpxParser internal constructor(url: String) :
       lat = null
       lon = null
       ele = null
-      if (null != atts && atts.length > 0) {
+      if (atts.length > 0) {
         lat = atts.getValue("lat")
         lon = atts.getValue("lon")
       }
@@ -467,7 +455,7 @@ class CueSheetGpxParser internal constructor(url: String) :
         val dlat = parseDouble(zlat)
         val dlon = parseDouble(zlon)
         if (null != zele) {
-          parent.addTrkpt(dlat, dlon, parseDouble(zele));
+          parent.addTrkpt(dlat, dlon, parseDouble(zele))
         } else {
           parent.addTrkpt(dlat, dlon)
         }

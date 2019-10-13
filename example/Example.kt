@@ -11,8 +11,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
 import android.widget.Toast
 
 import com.google.android.gms.common.ConnectionResult
@@ -28,15 +26,18 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.mgjg.kmztracker.R
 import android.Manifest.permission.*
+import android.content.Context
 import android.content.pm.PackageManager.*
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
 
 class Example : FragmentActivity() {
 
-  internal var googleMap: GoogleMap? = null
-  internal var locationManager: LocationManager
-  internal var pendingIntent: PendingIntent
-  internal var sharedPreferences: SharedPreferences
-  internal var locationCount = 0
+  private var googleMap: GoogleMap? = null
+  private lateinit var locationManager: LocationManager
+  private lateinit var pendingIntent: PendingIntent
+  private lateinit var sharedPreferences: SharedPreferences
+  private var locationCount = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

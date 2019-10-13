@@ -2,22 +2,15 @@ package com.mgjg.kmztracker.map
 
 //import android.graphics.Bitmap;
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Point
-import android.graphics.RectF
-
-import com.google.android.maps.GeoPoint
-import com.google.android.maps.MapView
-import com.google.android.maps.Overlay
-import com.google.android.maps.Projection
+import android.graphics.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.Projection
+import com.google.android.gms.maps.model.LatLng
 
 abstract class RouteOverlay private constructor(
-  protected val gp1: GeoPoint,
+  protected val gp1: LatLng,
   protected val defaultColor: Int
-) : Overlay() {
+) {
 
   protected var ovalRadius = 6
   protected var lineWidth = 5
@@ -34,39 +27,39 @@ abstract class RouteOverlay private constructor(
     return this
   }
 
-  override fun draw(canvas: Canvas?, view: MapView?, shadow: Boolean, `when`: Long): Boolean {
-    // v2 com.google.android.gms.maps.Projection projection = GoogleMap.getProjection();
-    val projection = view!!.projection
-    if (shadow == false) {
-      val paint = Paint()
-      paint.isAntiAlias = true
-      val point = Point()
-      projection.toPixels(gp1, point)
-      // v2 Point point = projection.toScreenLocation(gp1);
-      // mode=1&#65306;start
-      myDraw(canvas, view, projection, paint, point)
-      if (!text.isEmpty()) {
-        canvas!!.drawText(text, point.x.toFloat(), point.y.toFloat(), paint)
-      }
-
-    }
-    return super.draw(canvas, view, shadow, `when`)
-  }
+//  override fun draw(canvas: Canvas?, view: GoogleMap?, shadow: Boolean, `when`: Long): Boolean {
+//    // v2 Projection projection = GoogleMap.getProjection();
+//    val projection = view!!.projection
+//    if (shadow == false) {
+//      val paint = Paint()
+//      paint.isAntiAlias = true
+//      //val point = Point(); projection.toPixels(gp1, point)
+//      val point = projection.toScreenLocation(gp1);
+//      // v2 Point point = projection.toScreenLocation(gp1);
+//      // mode=1&#65306;start
+//      myDraw(canvas, view, projection, paint, point)
+//      if (!text.isEmpty()) {
+//        canvas!!.drawText(text, point.x.toFloat(), point.y.toFloat(), paint)
+//      }
+//
+//    }
+//    return super.draw(canvas, view, shadow, `when`)
+//  }
 
   protected abstract fun myDraw(
     canvas: Canvas?,
-    view: MapView,
-    projection: com.google.android.maps.Projection,
+    view: GoogleMap,
+    projection: Projection,
     paint: Paint,
     point: Point
   )
 
-  class StartOverlay @JvmOverloads constructor(gp1: GeoPoint, defaultColor: Int = 999) :
+  class StartOverlay @JvmOverloads constructor(gp1: LatLng, defaultColor: Int = 999) :
     RouteOverlay(gp1, defaultColor) {
 
     public override fun myDraw(
       canvas: Canvas?,
-      view: MapView,
+      view: GoogleMap,
       projection: Projection,
       paint: Paint,
       point: Point
@@ -93,13 +86,13 @@ abstract class RouteOverlay private constructor(
     }
   }
 
-  class MarkOverlay @JvmOverloads constructor(gp1: GeoPoint, defaultColor: Int = 999) :
+  class MarkOverlay @JvmOverloads constructor(gp1: LatLng, defaultColor: Int = 999) :
     RouteOverlay(gp1, defaultColor) {
 
     public override fun myDraw(
       canvas: Canvas?,
-      view: MapView,
-      projection: com.google.android.maps.Projection,
+      view: GoogleMap,
+      projection: Projection,
       paint: Paint,
       point: Point
     ) {
@@ -126,22 +119,22 @@ abstract class RouteOverlay private constructor(
   }
 
   class LineOverlay @JvmOverloads constructor(
-    gp1: GeoPoint, protected val gp2: GeoPoint // GeoPoint is a int. (6E)
+    gp1: LatLng, protected val gp2: LatLng // LatLng is a int. (6E)
     , defaultColor: Int = 999
   ) : RouteOverlay(gp1, defaultColor) {
 
     public override fun myDraw(
       canvas: Canvas?,
-      view: MapView,
-      projection: com.google.android.maps.Projection,
+      view: GoogleMap,
+      projection: Projection,
       paint: Paint,
       point: Point
     ) {
       // mode=2&#65306;path
 
       paint.color = if (defaultColor == 999) Color.RED else defaultColor
-      val point2 = Point()
-      projection.toPixels(gp2, point2)
+      // val point2 = Point(); // projection.toPixels(gp2, point2)
+      val point2 = projection.toScreenLocation(gp2);
       // v2 Point point2 = projection.toScreenLocation(gp2);
 
       paint.strokeWidth = lineWidth.toFloat()
@@ -158,15 +151,15 @@ abstract class RouteOverlay private constructor(
   }
 
   class LoopEndOverlay @JvmOverloads constructor(
-    gp1: GeoPoint,
-    protected val gp2: GeoPoint,
+    gp1: LatLng,
+    protected val gp2: LatLng,
     defaultColor: Int = 999
   ) : RouteOverlay(gp1, defaultColor) {
 
     public override fun myDraw(
       canvas: Canvas?,
-      view: MapView,
-      projection: com.google.android.maps.Projection,
+      view: GoogleMap,
+      projection: Projection,
       paint: Paint,
       point: Point
     ) {
@@ -181,8 +174,8 @@ abstract class RouteOverlay private constructor(
       // else
       // paint.setColor(defaultColor);
 
-      val point2 = Point()
-      projection.toPixels(gp2, point2)
+      //val point2 = Point(); //projection.toPixels(gp2, point2)
+      val point2 = projection.toScreenLocation(gp2);
       // v2 Point point2 = projection.toScreenLocation(gp2);
       paint.strokeWidth = lineWidth.toFloat()
       paint.alpha = if (defaultColor == Color.parseColor("#6C8715")) 220 else 120
@@ -215,13 +208,13 @@ abstract class RouteOverlay private constructor(
 
   }
 
-  class EndOverlay @JvmOverloads constructor(gp1: GeoPoint, defaultColor: Int = 999) :
+  class EndOverlay @JvmOverloads constructor(gp1: LatLng, defaultColor: Int = 999) :
     RouteOverlay(gp1, defaultColor) {
 
     public override fun myDraw(
       canvas: Canvas?,
-      view: MapView,
-      projection: com.google.android.maps.Projection,
+      view: GoogleMap,
+      projection: Projection,
       paint: Paint,
       point: Point
     ) {
@@ -237,7 +230,7 @@ abstract class RouteOverlay private constructor(
       // paint.setColor(defaultColor);
 
       // Point point2 = new Point();
-      // projection.toPixels(gp2, point2);
+      // val point2 = projection.toScreenLocation(gp2);
       // paint.setStrokeWidth(lineWidth);
       // paint.setAlpha(defaultColor == Color.parseColor("#6C8715") ? 220 : 120);
       // canvas.drawLine(point.x, point.y, point2.x, point2.y, paint);

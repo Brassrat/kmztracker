@@ -43,11 +43,6 @@ class CueSheetJsonParser internal constructor(private val inputStream: InputStre
       throw NoSuchElementException("no element available")
     }
 
-    override fun remove() {
-      throw UnsupportedOperationException("JSONArrayIterator does not support removal")
-
-    }
-
   }
 
   private inner class JsonParser @Throws(Exception::class)
@@ -75,9 +70,10 @@ class CueSheetJsonParser internal constructor(private val inputStream: InputStre
       try {
         val reader = BufferedReader(InputStreamReader(inputStream))
         val sb = StringBuilder()
-        var line: String? = null
-        while ((line = reader.readLine()) != null) {
-          sb.append(line!! + "\n")
+        var line: String? =  reader.readLine();
+        while (line != null) {
+          sb.append(line + "\n")
+          line = reader.readLine();
         }
         inputStream.close()
         val json = sb.toString()

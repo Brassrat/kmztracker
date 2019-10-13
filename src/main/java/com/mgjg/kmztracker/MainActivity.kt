@@ -1,31 +1,26 @@
 package com.mgjg.kmztracker
 
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapFragment
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.SupportMapFragment
 import com.mgjg.kmztracker.map.MapOverlayer
 import com.mgjg.kmztracker.preference.MapPreferencesActivity
 import com.mgjg.kmztracker.preference.Preferences
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.pm.PackageManager.PERMISSION_GRANTED
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReadyCallback {
   // static final LatLng HAMBURG = new LatLng(53.558, 9.927);
   // static final LatLng KIEL = new LatLng(53.551, 9.993);
 
@@ -36,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     instance = this
   }
 
-  public override fun onCreate(savedInstanceState: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     // Select the proper xml layout file which includes the matching Google
     // API Key
@@ -50,27 +45,30 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(toolbar)
 
     setupMap()
-
   }
 
   private fun setupMap() {
-
+    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
     if (ADD_MAP) {
       // Gets to fragment for the GoogleMap from the View and does initialization stuff
       // note, this is done asynchronously
-      val frag = fragmentManager.findFragmentById(R.id.map) as MapFragment
-      frag.getMapAsync(OnMapReady())
+      val fragmentManager = this.supportFragmentManager
+      // this.childFragmentManager
+      val cfm = fragmentManager.fragments[0].childFragmentManager
+      //val frag = cfm.findFragmentById(R.id.map) as SupportMapFragment
+      val frag = fragmentManager.fragments[0] as SupportMapFragment;
+      frag.getMapAsync(this)
     }
     for (ii in frontViews) {
-      val vv = findViewById(ii)
-      vv?.bringToFront()
+      val vv: View = findViewById(ii)
+      vv.bringToFront()
     }
+
   }
 
-  private inner class OnMapReady : OnMapReadyCallback {
-    override fun onMapReady(googleMap: GoogleMap) {
+  override fun onMapReady(googleMap: GoogleMap) {
       map = googleMap
-      map!!.setOnMarkerClickListener { false }
+      map.setOnMarkerClickListener { false }
       // Marker hamburg = map.addMarker(new MarkerOptions().position(HAMBURG)
       // .title("Hamburg"));
       // Marker kiel = map.addMarker(new MarkerOptions()
@@ -80,7 +78,7 @@ class MainActivity : AppCompatActivity() {
       // .icon(BitmapDescriptorFactory
       // .fromResource(R.drawable.ic_launcher)));
 
-      map!!.uiSettings.isMyLocationButtonEnabled = false
+      map.uiSettings.isMyLocationButtonEnabled = false
       if (ActivityCompat.checkSelfPermission(
           this@MainActivity,
           ACCESS_FINE_LOCATION
@@ -96,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         //                                          int[] grantResults)
         // to handle the case where the user grants the permission. See the documentation
         // for ActivityCompat#requestPermissions for more details.
-        map!!.isMyLocationEnabled = true
+        map.isMyLocationEnabled = true
       }
 
       // // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
@@ -118,12 +116,9 @@ class MainActivity : AppCompatActivity() {
   */
       locLstnr = LocationTracker(MapOverlayer(MainActivity.APP, map))
     }
-  }
 
   internal fun onResume(context: Activity) {
-    if (null != locLstnr) {
-      locLstnr!!.onResume(context)
-    }
+    locLstnr?.onResume(context)
   }
 
   internal fun onPause(context: Activity) {
@@ -200,7 +195,7 @@ class MainActivity : AppCompatActivity() {
    */
   fun setCueSheetFromXml(vv: View) {
     if (null != locLstnr) {
-      val et = findViewById(R.id.CUESHEET) as EditText
+      val et = findViewById<EditText>(R.id.CUESHEET)
       var url = et.text.toString()
       if (url.isEmpty()) {
         url = getString(R.string.map_file)
@@ -221,23 +216,17 @@ class MainActivity : AppCompatActivity() {
 
   fun moveToStart(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-    if (null != locLstnr) {
-      locLstnr!!.moveToStart()
-    }
+    locLstnr?.moveToStart()
   }
 
   fun moveNext(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-    if (null != locLstnr) {
-      locLstnr!!.moveNext()
-    }
+     locLstnr?.moveNext()
   }
 
   fun moveToEnd(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-    if (null != locLstnr) {
-      locLstnr!!.moveToEnd()
-    }
+      locLstnr?.moveToEnd()
   }
 
   companion object {
@@ -266,14 +255,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun hasLocationPermission(): Boolean {
-      return ActivityCompat.checkSelfPermission(
-        MainActivity.instance,
-        ACCESS_FINE_LOCATION
-      ) == PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-        MainActivity.instance,
-        ACCESS_COARSE_LOCATION
-      ) != PERMISSION_GRANTED
-    }
+      return ActivityCompat.checkSelfPermission( instance, ACCESS_FINE_LOCATION ) == PERMISSION_GRANTED
+          || ActivityCompat.checkSelfPermission( instance, ACCESS_COARSE_LOCATION ) == PERMISSION_GRANTED }
   }
 
 }

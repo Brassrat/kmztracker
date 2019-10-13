@@ -2,9 +2,7 @@
 
 package com.mgjg.kmztracker.cuesheet
 
-import android.app.Activity
 import android.graphics.Color
-import android.location.Location
 import android.util.Log
 
 import com.google.android.gms.maps.GoogleMap
@@ -17,6 +15,8 @@ import com.mgjg.kmztracker.R
 import com.mgjg.kmztracker.map.Placemark
 
 import java.util.ArrayList
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A list of Placemarks, each Placemark indicates a place on the route. The route consists of lines connecting the
@@ -26,7 +26,7 @@ import java.util.ArrayList
  * @author Jay Goldman
  */
 @Suppress("unused")
-class CueSheet(val appName: String, private val map: GoogleMap) {
+class CueSheet(val appName: String, private val map: GoogleMap?) {
   private val startIconId: Int
   private val endIconId: Int
   private val locationIconId: Int
@@ -231,7 +231,7 @@ class CueSheet(val appName: String, private val map: GoogleMap) {
       if (null == start) {
         start = next
         Log.d(appName, "start: $start")
-        marker = start.addMarker(map, startIconId)
+        if (map != null) { marker = start.addMarker(map, startIconId) }
       } else if (next === start) {
         // crosses start, assume it is loop end? or use iterator explicitly so we can check if last?
         // add if it has a marker and is on screen
@@ -246,9 +246,9 @@ class CueSheet(val appName: String, private val map: GoogleMap) {
         // TURN, LUNCH, etc marker
         // mapOverlays.add(new RouteOverlay.MarkOverlay(nextPoint).withText(next.getTitle()));
         if (next.title != null) {
-          marker = next.addMarker(map, locationIconId)
+          if (map != null) marker = next.addMarker(map, locationIconId)
         } else if (markerIconId > 0) {
-          marker = next.addMarker(map, markerIconId)
+          if (map != null) marker = next.addMarker(map, markerIconId)
         }
       }
       if (null != marker) {
@@ -259,7 +259,7 @@ class CueSheet(val appName: String, private val map: GoogleMap) {
 
     // if path is not a loop
     if (null != prev && prev != start) {
-      prev.addMarker(map, endIconId)// END
+      if (map != null) prev.addMarker(map, endIconId)// END
     }
 
   }
@@ -369,7 +369,7 @@ class CueSheet(val appName: String, private val map: GoogleMap) {
     }
 
     fun straddles(boundary: Double, pt1: Double, pt2: Double): Boolean {
-      return if (pt1 < pt2) boundary in pt1..pt2 else boundary in pt2..pt1
+      return boundary in min(pt1,pt2)..max(pt1, pt2)
     }
   }
 }

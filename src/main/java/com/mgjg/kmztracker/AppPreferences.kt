@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.mgjg.kmztracker
 
 import android.app.Application
@@ -5,7 +7,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Color
-import android.preference.PreferenceManager
 import android.util.Log
 
 /**
@@ -24,7 +25,7 @@ class AppPreferences protected constructor(app: Application) {
   init {
     //this.app = app;
     appContext = app.applicationContext
-    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
+    sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(app)
   }
 
   fun getStringResourceIdentifier(name: String): Int {
@@ -157,12 +158,12 @@ class AppPreferences protected constructor(app: Application) {
    */
   fun getByResource(keyName: String, defValue: Int): Int {
     //return getIntegerFromSettings(keyName, defValue);
-    val res = getByResource(keyName, "0")
+    val res = getByResource(keyName, defValue)
     var result: Int
     try {
-      result = Integer.valueOf(res)!!
-    } catch (e: ClassCastException) {
-      Log.e(TAG, "non-integer preference value " + res!!)
+      result = Integer.valueOf(res)
+    } catch (e: NumberFormatException) {
+      Log.e(TAG, "non-integer preference value " + res)
       result = 0
     }
 
@@ -180,9 +181,9 @@ class AppPreferences protected constructor(app: Application) {
     val res = getByResource(keyName, defValue.toString())
     var result: Boolean
     try {
-      result = java.lang.Boolean.valueOf(res)!!
-    } catch (e: ClassCastException) {
-      Log.e(TAG, "non-boolean preference value " + res!!)
+      result = java.lang.Boolean.valueOf(res)
+    } catch (e: NumberFormatException) {
+      Log.e(TAG, "non-boolean preference value " + res)
       result = false
     }
 
@@ -201,9 +202,9 @@ class AppPreferences protected constructor(app: Application) {
     val res = getByResource(keyName, defValue.toString())
     var result: Double
     try {
-      result = java.lang.Double.valueOf(res)!!
-    } catch (e: ClassCastException) {
-      Log.e(TAG, "non-double preference value " + res!!)
+      result = java.lang.Double.valueOf(res!!)
+    } catch (e: NumberFormatException) {
+      Log.e(TAG, "non-double preference value " + res)
       result = 0.0
     }
 
@@ -222,9 +223,9 @@ class AppPreferences protected constructor(app: Application) {
     val res = getByResource(keyName, defValue.toString())
     var result: Float
     try {
-      result = java.lang.Float.valueOf(res)!!
-    } catch (e: ClassCastException) {
-      Log.e(TAG, "non-float preference value " + res!!)
+      result = java.lang.Float.valueOf(res!!)
+    } catch (e: NumberFormatException) {
+      Log.e(TAG, "non-float preference value " + res)
       result = 0.0.toFloat()
     }
 
@@ -330,7 +331,7 @@ class AppPreferences protected constructor(app: Application) {
     }
     // no settings value, or value is not valid double
     xx = getAppResourceString(defKey)
-    if (!xx.isEmpty()) {
+    if (xx.isNotEmpty()) {
       try {
         return java.lang.Float.parseFloat(xx)
       } catch (e: Exception) {
@@ -352,7 +353,7 @@ class AppPreferences protected constructor(app: Application) {
     }
     // no settings value, or value is not valid double
     xx = getAppResourceString(defKey)
-    if (!xx.isEmpty()) {
+    if (xx.isNotEmpty()) {
       try {
         return java.lang.Double.parseDouble(xx)
       } catch (e: Exception) {
@@ -418,8 +419,8 @@ class AppPreferences protected constructor(app: Application) {
    * @param colorKeyName
    * @return a color resource id
    */
-  fun getAppResourceColorId(colorKeyName: String): Int {
-    var colorKeyName = colorKeyName
+  fun getAppResourceColorId(_colorKeyName: String): Int {
+    var colorKeyName = _colorKeyName
     // check for obsolete names ...
     if ("labels".equals(colorKeyName, ignoreCase = true)) {
       colorKeyName = "label"
@@ -451,7 +452,8 @@ class AppPreferences protected constructor(app: Application) {
   fun getPreferenceString(keyName: String, defKey: Int): String {
     return if (sharedPreferences.contains(keyName)) {
       try {
-        sharedPreferences.getString(keyName, "")
+        val zz = sharedPreferences.getString(keyName, "")
+        if (null == zz) "" else zz
       } catch (e: ClassCastException) {
         // unexpected ... shared preference is not a string ...
         // no idea what to do here since SharedPreferences has no getObject
@@ -493,7 +495,7 @@ class AppPreferences protected constructor(app: Application) {
         try {
           result = sharedPreferences.getInt(keyName, 0)
         } catch (e: ClassCastException) {
-          result = Integer.valueOf(sharedPreferences.getString(keyName, "0"))
+          result = Integer.valueOf(sharedPreferences.getString(keyName, "0")!!)
         }
 
       }
@@ -545,7 +547,7 @@ class AppPreferences protected constructor(app: Application) {
       Log.e(TAG, "Specified key is not a valid string resource id: " + key)
     } else {
       try {
-        result = java.lang.Float.valueOf(sharedPreferences.getString(keyName, defValue.toString()))
+        result = java.lang.Float.valueOf(sharedPreferences.getString(keyName, defValue.toString())!!)
       } catch (e: Exception) {
         Log.e(TAG, "Error parsing app setting for " + keyName + ": " + e.message)
       }
@@ -565,7 +567,7 @@ class AppPreferences protected constructor(app: Application) {
       Log.e(TAG, "Specified key is not a valid string resource id: " + key)
     } else {
       try {
-        return java.lang.Double.valueOf(sharedPreferences.getString(keyName, defValue.toString()))!!
+        return java.lang.Double.valueOf(sharedPreferences.getString(keyName, defValue.toString())!!)
       } catch (e: Exception) {
         Log.e(TAG, "Error parsing app setting for " + keyName + ": " + e.message)
       }
@@ -735,7 +737,7 @@ class AppPreferences protected constructor(app: Application) {
 
   private fun getSettingFloat(key: Int): Float {
     val xx = getAppResourceString(key)
-    if (!xx.isEmpty()) {
+    if (xx.isNotEmpty()) {
       try {
         return java.lang.Float.parseFloat(xx)
       } catch (e: Exception) {

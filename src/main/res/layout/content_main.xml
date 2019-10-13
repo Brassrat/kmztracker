@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="com.mgjg.kmztracker.MainActivity"
     android:layout_below="@id/bar"
     android:paddingTop="60dp"
+    tools:context="com.mgjg.kmztracker.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <LinearLayout
@@ -14,34 +13,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/GPS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/gps_on_off"/>
+            android:contentDescription="@string/gps_on_off" />
 
         <TextView
             android:id="@+id/GPS_LAT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/lat"
-            tools:text="lat"
-            android:paddingEnd="5dp"
             android:paddingStart="5dp"
-            />
+            android:paddingEnd="5dp"
+            android:text="@string/lat"
+            tools:text="lat" />
 
         <TextView
             android:id="@+id/GPS_LON"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/lon"
-            tools:text="lon"
-            android:paddingEnd="5dp"
             android:paddingStart="5dp"
-            />
+            android:paddingEnd="5dp"
+            android:text="@string/lon"
+            tools:text="lon" />
     </LinearLayout>
 
     <LinearLayout
@@ -50,66 +46,68 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/GPS_INFO"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/READ_CUESHEET"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/load"
+            android:labelFor="@+id/CUESHEET"
             android:onClick="setCueSheetFromXml"
-            android:labelFor="@+id/CUESHEET"/>
+            android:text="@string/load" />
 
         <EditText
             android:id="@id/CUESHEET"
-            android:paddingEnd="10dp"
-            android:paddingStart="10dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/map_file"
+            android:autofillHints=""
             android:inputType="textAutoComplete"
-            tools:text="@string/ToolsMapFile"
-            />
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/map_file"
+            tools:text="@string/ToolsMapFile" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/CUESHEET_MOVE"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/CUESHEET_INFO"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/MOVE_START"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start"
             android:onClick="moveToStart"
-            />
+            android:text="@string/start" />
+
         <Button
             android:id="@+id/MOVE_NEXT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/next"
             android:onClick="moveNext"
-            />
+            android:text="@string/next" />
+
         <Button
             android:id="@+id/MOVE_END"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/end"
             android:onClick="moveToEnd"
-            />
-        </LinearLayout>
+            android:text="@string/end" />
+    </LinearLayout>
+
     <fragment
         android:id="@+id/map"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@id/CUESHEET_MOVE"
-        class="com.google.android.gms.maps.MapFragment"
         android:clickable="true"
-        tools:layout="@android:layout/simple_gallery_item"/>
+        android:focusable="true"
+        />
+        <!-- tools:layout="@android:layout/simple_gallery_item" -->
 
     <!--
     <com.google.android.maps.MapView

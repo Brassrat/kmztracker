@@ -1,8 +1,6 @@
 package com.mgjg.kmztracker.preference
 
 import android.content.SharedPreferences
-import android.content.SharedPreferences.Editor
-
 import com.mgjg.kmztracker.AppPreferences
 import java.lang.Double.valueOf
 
@@ -23,7 +21,7 @@ class Preferences private constructor() {
     return getValue(nameList, def,
       object : GetPreference<Double> {
         override operator fun get(nameList: String, def: Double?): Double {
-          val dd = if (null == def) 0.0 else def
+          val dd = def ?: 0.0
           val sp = sharedPrefs()
           return if (null == sp) dd else
             valueOf(sp.getFloat(nameList, dd.toFloat()).toDouble())
@@ -44,13 +42,14 @@ class Preferences private constructor() {
     }
 
     private fun <T> putValue(name: String, value: T, pp: PutPreference<T>): T {
-      var value = value
-      if (null != sharedPrefs()) {
-        val editor = sharedPrefs()!!.edit()
-        value = pp.put(editor, name, value)
+      var vv = value
+      val sp = sharedPrefs()
+      if (null != sp) {
+        val editor = sp.edit()
+        vv = pp.put(editor, name, value)
         editor.commit()
       }
-      return value
+      return vv
     }
 
     private fun <T> getValue(
@@ -59,7 +58,8 @@ class Preferences private constructor() {
       prefGetter: GetPreference<T>,
       prefSetter: PutPreference<T>
     ): T {
-      val saved = if (null == sharedPrefs()) false else sharedPrefs()!!.contains(nameList)
+      val sp = sharedPrefs()
+      val saved = sp?.contains(nameList) ?: false
       return if (saved) prefGetter[nameList, def] else putValue(nameList, def, prefSetter)
       // !saved ==> vv == def
       // saved ==> vv is saved value
@@ -69,14 +69,13 @@ class Preferences private constructor() {
       return getString(AppPreferences.instance!!.getIdentifier(key), defValue)
     }
 
-    fun getString(nameList: String, defValue: String): String {
-      return getValue(nameList, defValue,
+    fun getString(nameList: String, def: String): String {
+      return getValue(nameList, def,
         object : GetPreference<String> {
-          override fun get(nameList: String, defValue: String): String? {
-            return if (null == sharedPrefs()) defValue else sharedPrefs()!!.getString(
-              nameList,
-              defValue
-            )
+          override fun get(nameList: String, def: String?): String {
+            val dd = def ?: ""
+            val sp = sharedPrefs()
+            return if (null == sp) dd else sp.getString(nameList, dd)!!
           }
         },
         object : PutPreference<String> {
@@ -100,17 +99,17 @@ class Preferences private constructor() {
     fun getBoolean(nameList: String, def: Boolean): Boolean {
       return getValue(nameList, def,
         object : GetPreference<Boolean> {
-          override operator fun get(nameList: String, def: Boolean?): Boolean? {
-            return if (null == sharedPrefs()) def else sharedPrefs()!!.getBoolean(nameList, def!!)
+          override operator fun get(nameList: String, def: Boolean?): Boolean {
+            return if (null == sharedPrefs()) def!! else sharedPrefs()!!.getBoolean(nameList, def!!)
           }
         },
         object : PutPreference<Boolean> {
           override fun put(
             editor: SharedPreferences.Editor,
             name: String,
-            value: Boolean?
-          ): Boolean? {
-            editor.putBoolean(name, value!!)
+            value: Boolean
+          ): Boolean {
+            editor.putBoolean(name, value)
             return value
           }
         })
@@ -122,9 +121,9 @@ class Preferences private constructor() {
           override fun put(
             editor: SharedPreferences.Editor,
             name: String,
-            value: Boolean?
-          ): Boolean? {
-            editor.putBoolean(name, value!!)
+            value: Boolean
+          ): Boolean {
+            editor.putBoolean(name, value)
             return value
           }
         })
@@ -136,9 +135,9 @@ class Preferences private constructor() {
           override fun put(
             editor: SharedPreferences.Editor,
             name: String,
-            value: Double?
-          ): Double? {
-            editor.putFloat(name, value!!.toFloat())
+            value: Double
+          ): Double {
+            editor.putFloat(name, value.toFloat())
             return value
           }
         })
@@ -147,13 +146,13 @@ class Preferences private constructor() {
     fun getInteger(nameList: String, def: Int): Int {
       return getValue(nameList, def,
         object : GetPreference<Int> {
-          override operator fun get(nameList: String, def: Int?): Int? {
-            return if (null == sharedPrefs()) def else sharedPrefs()!!.getInt(nameList, def!!)
+          override operator fun get(nameList: String, def: Int?): Int {
+            return if (null == sharedPrefs()) def!! else sharedPrefs()!!.getInt(nameList, def!!)
           }
         },
         object : PutPreference<Int> {
-          override fun put(editor: SharedPreferences.Editor, name: String, value: Int?): Int? {
-            editor.putInt(name, value!!)
+          override fun put(editor: SharedPreferences.Editor, name: String, value: Int): Int {
+            editor.putInt(name, value)
             return value
           }
         })
@@ -162,8 +161,8 @@ class Preferences private constructor() {
     fun putInteger(nameList: String, def: Int): Int {
       return putValue(nameList, def,
         object : PutPreference<Int> {
-          override fun put(editor: SharedPreferences.Editor, name: String, value: Int?): Int? {
-            editor.putInt(name, value!!)
+          override fun put(editor: SharedPreferences.Editor, name: String, value: Int): Int {
+            editor.putInt(name, value)
             return value
           }
         })

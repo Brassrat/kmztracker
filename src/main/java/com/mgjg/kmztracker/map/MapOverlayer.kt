@@ -1,35 +1,17 @@
 package com.mgjg.kmztracker.map
 
-import android.app.Activity
-import android.graphics.Bitmap
+import android.graphics.*
 import android.graphics.Bitmap.Config
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.location.Location
-import android.util.Log
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.mgjg.kmztracker.AppResources
 import com.mgjg.kmztracker.R
 import com.mgjg.kmztracker.cuesheet.CueSheet
-import com.mgjg.kmztracker.cuesheet.parser.CueSheetParserFactory
-
-import java.util.ArrayList
-import java.util.Deque
-import java.util.LinkedList
+import java.util.*
 
 class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
   // private final Stack<LatLng> points = new Stack<LatLng>();
@@ -37,7 +19,7 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
 
   private val initial_zoom = 12
 
-  private val cueSheet: CueSheet?
+  private val cueSheet: CueSheet
   private var locationMarker: Marker? = null
   private val color: Int
   private val markers = ArrayList<Marker>()
@@ -370,7 +352,9 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     // i.e., get rid of all this stuff...
     val drawId = if (bearing < 0) leftId else rightId
 
-    if (null == prevDrawable || prevDrawId != drawId || prevBearing != bearing) {
+    val xxx = prevDrawable;
+
+    if ((xxx == null) || (prevDrawId != drawId) || (prevBearing != bearing)) {
       // Bitmap arrowBitmap = BitmapFactory.decodeResource(getResources(), drawId);
       // Drawable drawable = getResources().getDrawable(drawId);
       val bitMap = BitmapFactory.decodeResource(AppResources.resources, drawId, null)
@@ -395,9 +379,11 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
       prevDrawId = drawId
       prevBearing = bearing
       // prevDrawable = new BitmapDrawable(canvasBitmap);
-      prevDrawable = BitmapDrawable(AppResources.resources, canvasBitmap)
+      val yyy = BitmapDrawable(AppResources.resources, canvasBitmap)
+      prevDrawable = yyy;
+      return yyy;
     }
-    return prevDrawable
+    return xxx;
   }
 
   fun isVisible(point: LatLng): Boolean {

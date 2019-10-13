@@ -26,7 +26,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@id/GPS"
-        class="com.google.android.gms.maps.MapFragment"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:clickable="true"/>
 
     <!--

@@ -27,7 +27,7 @@
         android:label="@string/app_name"
         android:theme="@style/xyzzy"
         android:name=".KmzTrackerApp"
-        >
+        android:fullBackupContent="true">
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
@@ -44,6 +44,8 @@
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>
         </activity>
+        <activity android:name=".map.ProximityActivity" />
+        <!--
         <activity android:name=".map.ProximityActivity" android:label="Proximity"
                   android:screenOrientation="nosensor">
             <intent-filter>
@@ -51,6 +53,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".example.ProximityActivity" />
+        -->
         <!--<service-->
             <!--android:name=".cuesheet.parser.CueSheetService"-->
             <!--android:exported="false" />-->
