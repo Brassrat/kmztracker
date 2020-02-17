@@ -84,7 +84,7 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     }
 
   init {
-    cueSheet = CueSheet(appName, googleMap)
+    cueSheet = CueSheet(appName, googleMap, this)
 
     googleMap.uiSettings.isZoomControlsEnabled = true
     // MapController mapController = googleMap.getUiSettings().getController();
@@ -101,16 +101,21 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     RouteService.updateCueSheet(cueSheet, url, color)
   }
 
+  fun clear() {
+    locationMarker = null;
+    points.clear();
+  }
+
   fun moveToStart() {
-    mvPoint(cueSheet!!.moveToStart())
+    mvPoint(cueSheet.moveToStart())
   }
 
   fun moveNext() {
-    mvPoint(cueSheet!!.moveNext())
+    mvPoint(cueSheet.moveNext())
   }
 
   fun moveToEnd() {
-    mvPoint(cueSheet!!.moveToEnd())
+    mvPoint(cueSheet.moveToEnd())
   }
 
   fun mvPoint(placemark: Placemark): LatLng? {
@@ -131,10 +136,10 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     // Toast.makeText(getApplicationContext(), Text,
     // Toast.LENGTH_SHORT).show();
     val bearing: Float
-    if (points.size <= 0) {
+    val prev = points.peek();
+    if (null == prev) {
       bearing = 270f
     } else {
-      val prev = points.peek()
       val distAndBearing = dist(prev, newPoint)
       bearing = distAndBearing[1]
     }
@@ -157,11 +162,6 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     // {
     // return geo;
     // }
-    var ctr: LatLng? = mapCenter
-    val boundaries = mapBoundaries
-    ctr = boundaries.center
-    // double ctrLat = ctr.latitude;
-    // double ctrLon = ctr.longitude;
     var newCtr: LatLng? = null
 
     // int ctrLat = ctr.getLatitudeE6();
@@ -172,15 +172,17 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     // if new point is not within the current display
     // make the new point the center since we don't know
     // which way we are moving
+    val boundaries = mapBoundaries
     if (!boundaries.contains(newPoint)) {
       newCtr = newPoint
     } else {
-      var ctrLat = ctr!!.latitude
-      var ctrLon = ctr.longitude
       val ul_lat = boundaries.northeast.latitude
       val ul_lon = boundaries.southwest.longitude
       val lr_lat = boundaries.southwest.latitude
       val lr_lon = boundaries.northeast.longitude
+      val ctr: LatLng = boundaries.center
+      var ctrLat = ctr.latitude
+      var ctrLon = ctr.longitude
 
       // compute box within current display which
       // if point stays in the box means we don't move the center
@@ -200,40 +202,28 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
         // if new point is too low on screen move it up a bit, i.e. move
         // center latitude smaller
         ctrLat -= (ul_lat - lr_lat) * box_move_pct // (lonHalf * 1.2);
-        ctr = null
       } else if (newPoint.latitude > topLat) {
         ctrLat += (ul_lat - lr_lat) * box_move_pct // (lonHalf * 1.2);
-        ctr = null
       }
       if (newPoint.longitude < leftLon) {
         ctrLon -= (ul_lon - lr_lon) * box_move_pct // (latHalf * 1.2);
-        ctr = null
       }
       if (newPoint.longitude > rightLon) {
         ctrLon += (ul_lon - lr_lon) * box_move_pct // (latHalf * 1.2);
-        ctr = null
       }
       newCtr = LatLng(ctrLat, ctrLon)
     }
 
-    if (null != newCtr && null != cueSheet) {
-      cueSheet.drawPath(color)
-    }
+    cueSheet.drawPath(color)
 
-    updateLocationMarker(newPoint, bearing, "On the road", "Here")
-    if (null != newCtr) {
-      // MapController mapController = mapView.getController();
-      ctr = newCtr
-      // mapController.animateTo(ctr);
-      // mapController.setCenter(new LatLng(ctrLat, ctrLon));
-      googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newCtr, 12.0f))
-    }
+    val zoom = updateLocationMarker(newPoint, bearing, "On the road", "Here")
+    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newCtr, zoom));
 
     // googleMap.invalidate(); // may be overkill ???
     return newPoint
   }
 
-  private fun updateLocationMarker(point: LatLng, bearing: Float, title: String, snippet: String) {
+  private fun updateLocationMarker(point: LatLng, bearing: Float, title: String, snippet: String): Float {
     // MapView mapView = (MapView) mapActivity.findViewById(R.id.mapview);
 
     // googleMap.clear();
@@ -257,6 +247,7 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     val right =
       if (bigger) R.drawable.mountain_bike_helmet_16_flipped else R.drawable.mountain_bike_helmet_16_flipped
     val drawable = rotateDrawable(left, right, bearing)
+    val icon = drawableToIcon(drawable);
     // Drawable drawable = getResources().getDrawable(drawId);
     // LocationOverlay locationOverlay = new LocationOverlay(drawable);
 
@@ -266,25 +257,29 @@ class MapOverlayer(appName: String, private val googleMap: GoogleMap) {
     // googleMap.setEnabled(true);
     // see https://developers.google.com/maps/documentation/android/marker
     // ?? can we change existing marker or do we have to remove it and add another
+    var zoom = googleMap.getCameraPosition().zoom;
     if (null == locationMarker) {
       val mo = MarkerOptions()
         .position(point)
         .flat(true)
         .title(title)
-        .icon(drawableToIcon(drawable))
-      if (ALLOW_ROTATION) {
-        mo.anchor(0.5f, 0.5f)
-        mo.rotation(bearing)
-      }
+        .icon(icon)
       locationMarker = googleMap.addMarker(mo)
       // markers.add(googleMap.addMarker(mo));
-    } else {
-      locationMarker!!.setPosition(point)
-      if (ALLOW_ROTATION) {
-        locationMarker!!.setAnchor(0.5f, 0.5f)
-        locationMarker!!.rotation = bearing
+      if (zoom < 6.0f) {
+        zoom = 12.0f;
       }
     }
+    val mrk = locationMarker;
+    if (null != mrk) {
+      mrk.setPosition(point);
+      mrk.setIcon(icon);
+      if (ALLOW_ROTATION) {
+        mrk.setAnchor(0.5f, 0.5f)
+        mrk.rotation = bearing
+      }
+    }
+    return zoom;
   }
 
   fun drawMarker(point: LatLng): Marker {

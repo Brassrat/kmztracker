@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
   // static final LatLng KIEL = new LatLng(53.551, 9.993);
 
   private lateinit var map: GoogleMap
-  private var locLstnr: LocationTracker? = null
+  private var locationTracker: LocationTracker? = null
 
   init {
     instance = this
@@ -114,16 +114,16 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
           .snippet("The most populous city in Australia.")
           .position(sydney));
   */
-      locLstnr = LocationTracker(MapOverlayer(MainActivity.APP, map))
+      locationTracker = LocationTracker(MapOverlayer(MainActivity.APP, map))
     }
 
   internal fun onResume(context: Activity) {
-    locLstnr?.onResume(context)
+    locationTracker?.onResume(context)
   }
 
   internal fun onPause(context: Activity) {
-    if (null != locLstnr) {
-      locLstnr!!.onPause(context)
+    if (null != locationTracker) {
+      locationTracker!!.onPause(context)
     }
   }
 
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
    * @param vv
    */
   fun setCueSheetFromXml(vv: View) {
-    if (null != locLstnr) {
+    if (null != locationTracker) {
       val et = findViewById<EditText>(R.id.CUESHEET)
       var url = et.text.toString()
       if (url.isEmpty()) {
@@ -203,30 +203,33 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
       // get current preference for serverIP
       val key = R.string.map_server_preference
       val prefName = AppPreferences.instance!!.getIdentifier(key)
-      val lanSettings = Preferences.getString(prefName, "")
+      var lanSettings = Preferences.getString(prefName, "")
       //SharedPreferences prefs = getSharedPreferences("general_settings", Context.MODE_PRIVATE);
       //String lanSettings = prefs.getString("serverIP", null);
       if (url.indexOf('.') < 0) {
         url += if (lanSettings.endsWith("gpx")) ".gpx" else ".kml"
       }
+      if (lanSettings.length <= 0) {
+        lanSettings = "file://";
+      }
       url = lanSettings + "/" + url
-      locLstnr!!.updateCueSheet(url)
+      locationTracker!!.updateCueSheet(url)
     }
   }
 
   fun moveToStart(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-    locLstnr?.moveToStart()
+    locationTracker?.moveToStart()
   }
 
   fun moveNext(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-     locLstnr?.moveNext()
+     locationTracker?.moveNext()
   }
 
   fun moveToEnd(vv: View) {
     //map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-      locLstnr?.moveToEnd()
+      locationTracker?.moveToEnd()
   }
 
   companion object {

@@ -14,19 +14,21 @@ class RouteService(private val appName: String) {
 
   fun calculateRoute(
     map: GoogleMap,
+    overlayer: MapOverlayer,
     activity: Activity,
     start: Location,
     target: Location,
     mode: Int
   ): CueSheet? {
     return calculateRoute(
-      map, start.latitude.toString() + "," + start.longitude,
+      map, overlayer, start.latitude.toString() + "," + start.longitude,
       target.latitude.toString() + "," + target.longitude, mode
     )
   }
 
   fun calculateRoute(
     map: GoogleMap,
+    overlayer: MapOverlayer,
     activity: Activity,
     startLat: Double?,
     startLng: Double?,
@@ -36,6 +38,7 @@ class RouteService(private val appName: String) {
   ): CueSheet? {
     return calculateRoute(
       map,
+      overlayer,
       startLat.toString() + "," + startLng,
       targetLat.toString() + "," + targetLng,
       mode
@@ -44,6 +47,7 @@ class RouteService(private val appName: String) {
 
   fun calculateRoute(
     map: GoogleMap,
+    overlayer: MapOverlayer,
     startCoords: String,
     targetCoords: String,
     mode: Int
@@ -64,10 +68,10 @@ class RouteService(private val appName: String) {
     var navSet: CueSheet? = null
     // for mode_any: try pedestrian route calculation first, if it fails, fall back to car route
     if (mode == MODE_ANY || mode == MODE_WALKING) {
-      navSet = updateCueSheet(CueSheet(appName, map), urlPedestrianMode, color)
+      navSet = updateCueSheet(CueSheet(appName, map, overlayer), urlPedestrianMode, color)
     }
     if (mode == MODE_ANY && navSet == null || mode == MODE_CAR) {
-      navSet = updateCueSheet(CueSheet(appName, map), urlCarMode, color)
+      navSet = updateCueSheet(CueSheet(appName, map, overlayer), urlCarMode, color)
     }
     return navSet
   }

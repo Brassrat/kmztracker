@@ -20,7 +20,7 @@
     <string name="mgjg_gpx_server">http://www.mgjg.com/gpx</string>
     <string name="mgjg_kml_server">http://www.mgjg.com/kml</string>
     <string name="local_net_gpx_server">http://192.168.1.2:9999/gpx</string>
-    <string name="local_net_kml_server">http://192.168.1.2:8080/kml</string>
+    <string name="local_net_kml_server">http://192.168.1.2:9999/kml</string>
     <string name="ToolsMapFile">MapFile</string>
     <string name="user_info">User Info</string>
     <string name="user_name">username</string>

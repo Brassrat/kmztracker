@@ -1,11 +1,7 @@
 package com.mgjg.kmztracker.preference
 
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.Preference
-import android.preference.PreferenceActivity
-import android.preference.PreferenceFragment
-
+import android.preference.*
 import com.mgjg.kmztracker.AppPreferences
 import com.mgjg.kmztracker.R
 
@@ -26,21 +22,32 @@ class MapPreferencesActivity : PreferenceActivity() {
 
       val key = R.string.map_server_preference
       val prefName = AppPreferences.instance!!.getIdentifier(key)
-      val value = Preferences.getString(prefName, "")
-      if (!value.isEmpty()) {
-        val summary = "current: " + value
-        pref.summary = summary
-        if (pref is ListPreference) {
-          val ii = pref.findIndexOfValue(value)
+      var value = Preferences.getString(prefName, "")
+      if (!value.isEmpty() && (pref is ListPreference)) {
+          var ii = pref.findIndexOfValue(value)
+          if (ii < 0) {
+            ii = 0
+            pref.setValueIndex(ii)
+            value = pref.getValue()
+            Preferences.putString(prefName, value)
+          }
+          val summary = "current: " + value
+          pref.summary = summary
           pref.setValueIndex(ii)
-        }
       }
       pref.onPreferenceChangeListener =
           Preference.OnPreferenceChangeListener { preference, newValue ->
-            // do whatever you want with new value
-            Preferences.putString(prefName, newValue.toString())
-            // true to update the state of the Preference with the new value
-            // in case you want to disallow the change return false
+            val value = newValue.toString()
+            Preferences.putString(prefName, value);
+            if (pref is ListPreference) {
+              val ii = pref.findIndexOfValue(value)
+              // do whatever you want with new value
+              // true to update the state of the Preference with the new value
+              // in case you want to disallow the change return false
+              val summary = "current: " + value
+              pref.summary = summary
+              pref.setValueIndex(ii)
+            }
             true
           }
     }

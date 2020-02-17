@@ -11,6 +11,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.mgjg.kmztracker.MainActivity
 import com.mgjg.kmztracker.cuesheet.CueSheet
+import com.mgjg.kmztracker.map.MapOverlayer
 
 
 /**
@@ -21,9 +22,10 @@ class CueSheetService : IntentService("CueSheetService") {
 
   override fun onHandleIntent(workIntent: Intent?) {
     val appName = "kmztracker"
-    val map: GoogleMap? = null // TBD
+    val map: GoogleMap? = null; // TBD
+    val overlayer: MapOverlayer? = null; // TBD
     val color = workIntent!!.getIntExtra("color", Color.BLACK)
-    val cueSheet = CueSheet(appName, map)
+    val cueSheet = CueSheet(appName, map, overlayer);
     // Gets data from the incoming Intent
     val urlString = workIntent.getStringExtra("url")
     try {

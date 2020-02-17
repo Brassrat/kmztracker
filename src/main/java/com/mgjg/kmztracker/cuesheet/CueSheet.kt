@@ -4,17 +4,12 @@ package com.mgjg.kmztracker.cuesheet
 
 import android.graphics.Color
 import android.util.Log
-
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.mgjg.kmztracker.R
+import com.mgjg.kmztracker.map.MapOverlayer
 import com.mgjg.kmztracker.map.Placemark
-
-import java.util.ArrayList
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -26,7 +21,7 @@ import kotlin.math.min
  * @author Jay Goldman
  */
 @Suppress("unused")
-class CueSheet(val appName: String, private val map: GoogleMap?) {
+class CueSheet(val appName: String, private val map: GoogleMap?, private val overlayer: MapOverlayer?) {
   private val startIconId: Int
   private val endIconId: Int
   private val locationIconId: Int
@@ -85,12 +80,15 @@ class CueSheet(val appName: String, private val map: GoogleMap?) {
 
   override fun toString(): String {
     val buf = StringBuffer()
-    buf.append(appName).append(":\n")
+    buf.append(appName).append(":[")
+    var sep = ",";
     synchronized(placemarks) {
       for (p in placemarks) {
-        buf.append("\n").append(p.toString())
+        buf.append(sep).append(p.toString())
+        sep = "";
       }
     }
+    buf.append("]");
     return buf.toString()
   }
 
@@ -205,6 +203,7 @@ class CueSheet(val appName: String, private val map: GoogleMap?) {
 
   fun clearMap() {
     map?.clear()
+    overlayer?.clear();
   }
 
   /**
