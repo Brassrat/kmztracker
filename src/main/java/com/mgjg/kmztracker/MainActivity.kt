@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
       // this.childFragmentManager
       val cfm = fragmentManager.fragments[0].childFragmentManager
       //val frag = cfm.findFragmentById(R.id.map) as SupportMapFragment
-      val frag = fragmentManager.fragments[0] as SupportMapFragment;
+      val frag = fragmentManager.fragments[0] as SupportMapFragment
       frag.getMapAsync(this)
     }
     for (ii in frontViews) {
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
           .snippet("The most populous city in Australia.")
           .position(sydney));
   */
-      locationTracker = LocationTracker(MapOverlayer(MainActivity.APP, map))
+      locationTracker = LocationTracker(MapOverlayer(APP, map))
     }
 
   internal fun onResume(context: Activity) {
@@ -137,16 +137,15 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     // Take appropriate action for each action item click
-    val result: Boolean
-    when (item.itemId) {
+    val result: Boolean = when (item.itemId) {
       R.id.menu_settings -> {
         // settings
         // launch preference activity
         val ii = Intent(this, MapPreferencesActivity::class.java)
         startActivity(ii)
-        result = true
+        true
       }
-      else -> result = super.onOptionsItemSelected(item)
+      else -> super.onOptionsItemSelected(item)
     }
     return result
   }
@@ -163,7 +162,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
         result = true
       R.id.action_location_found -> {
         // location found
-        LocationFound()
+        locationFound()
         result = true
       }
       R.id.action_refresh ->
@@ -183,7 +182,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
   /**
    * Launching new activity
    */
-  private fun LocationFound() {
+  private fun locationFound() {
     // Intent i = new Intent(MainActivity.this, LocationFound.class);
     //startActivity(i);
   }
@@ -209,10 +208,10 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
       if (url.indexOf('.') < 0) {
         url += if (lanSettings.endsWith("gpx")) ".gpx" else ".kml"
       }
-      if (lanSettings.length <= 0) {
-        lanSettings = "file://";
+      if (lanSettings.isEmpty()) {
+        lanSettings = "file://"
       }
-      url = lanSettings + "/" + url
+      url = "$lanSettings/$url"
       locationTracker!!.updateCueSheet(url)
     }
   }
@@ -234,7 +233,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
 
   companion object {
 
-    val APP = "com.mgjg.kmztracker"
+    const val APP = "com.mgjg.kmztracker"
 
     private val frontViews =
       intArrayOf(R.id.GPS, R.id.GPS_LAT, R.id.GPS_LON, R.id.READ_CUESHEET, R.id.CUESHEET)
@@ -254,7 +253,7 @@ class MainActivity : AppCompatActivity(), com.google.android.gms.maps.OnMapReady
     // }
 
     fun runOnUi(runThis: Runnable) {
-      MainActivity.instance.runOnUiThread(runThis)
+      instance.runOnUiThread(runThis)
     }
 
     fun hasLocationPermission(): Boolean {
